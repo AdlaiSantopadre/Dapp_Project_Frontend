@@ -15,9 +15,10 @@ app.use(express.json());       // Parsing JSON nelle richieste
 
 
 const authRoutes = require('./routes/auth'); // Importa rotte di autenticazione
-
-
 app.use('/auth', authRoutes); // Rotte di autenticazione
+
+const rolesRoutes = require('./routes/roles');
+app.use('/roles', rolesRoutes);
 
 // 4. Rotte di test
 app.get('/', (req, res) => {

@@ -1,0 +1,10 @@
+### Assegna ruolo via smart contract
+POST http://localhost:3000/roles/grant
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZGRyZXNzIjoiMHhBZG1pbi4uLiIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc1NDMwMDY1MSwiZXhwIjoxNzU0MzA0MjUxfQ.NZClLbEm7-8H8FcEMz_i0j_5NpdsW_VJJPJQ4E-WfZk
+Content-Type: application/json
+
+{
+  "role": "CERTIFICATORE_ROLE",
+  "target": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+}
+

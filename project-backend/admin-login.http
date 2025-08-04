@@ -1,0 +1,9 @@
+### Login to the admin interface
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "address": "0xAdmin...",
+  "password": "adminpass"
+  
+}
