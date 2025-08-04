@@ -1,0 +1,8 @@
+### Test login - CERTIFICATORE
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "address": "0xAbc123...",
+  "password": "cert123"
+}
