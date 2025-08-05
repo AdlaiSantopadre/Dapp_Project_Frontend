@@ -1,14 +1,14 @@
 // routes/auth.js
 const express = require('express');
-//const jwt = require('jsonwebtoken'); //chiamata diretta alla libreria jwt
+const jwt = require('jsonwebtoken'); //chiamata diretta alla libreria jwt
 const { generateToken } = require('../utils/jwt');
 const router = express.Router();
 
-
+const SECRET = process.env.JWT_SECRET || "supersegreta";
 
 // Utenti mock: address → { password, ruolo }
 const users = {
-  '0xAbc123...': { password: 'cert123', role: 'CERTIFICATORE_ROLE' },
+  '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266': { password: 'cert123', role: 'CERTIFICATORE_ROLE' },
   '0xAdmin...': { password: 'adminpass', role: 'admin' }
 };
 
