@@ -28,7 +28,7 @@ router.post('/grant',
         });
       }
 
-      // 🟢 Se non ha il ruolo, lo assegna
+      // Se non ha il ruolo, lo assegna
       const txHash = await grantUserRole(role, target);
       res.json({
         message: `Ruolo "${role}" assegnato a ${target}`,

@@ -3,7 +3,7 @@ POST http://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-  "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" # Indirizzo del destinatario Account #0,
+  "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
   "password": "adminpass"
   
 }
