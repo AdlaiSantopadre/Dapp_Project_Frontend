@@ -1,6 +1,5 @@
-// middleware/roleMiddleware.js
-
-function roleMiddleware(allowedRoles = []) {
+// Middleware per controllare i ruoli degli utenti
+export default function roleMiddleware(allowedRoles = []) {
   return function (req, res, next) {
     const userRole = req.user?.role;
 
@@ -12,4 +11,3 @@ function roleMiddleware(allowedRoles = []) {
   };
 }
 
-module.exports = roleMiddleware;

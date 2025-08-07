@@ -1,14 +1,14 @@
 // routes/auth.js
-const express = require('express');
-//const jwt = require('jsonwebtoken'); //chiamata diretta alla libreria jwt
-const { generateToken } = require('../utils/jwt');
+import express from 'express';
+import { generateToken } from '../utils/jwt.js'; // Importa la funzione per generare il token
+import { normalizeAddress } from '../utils/normalize.js'; // Importa la funzione per normalizzare l'indirizzo
+
 const router = express.Router();
 
-const SECRET = process.env.JWT_SECRET || "supersegreta";
+//const SECRET = process.env.JWT_SECRET || "supersegreta";
 
-const { normalizeAddress } = require('../utils/normalize');
 // Utenti mock: address → { password, ruolo } 
-// users ATTENZIONE ALLE STRINGHE (LOWERCASE)
+// users ATTENZIONE ALLE STRINGHE ADDRESS: (LOWERCASE)
 const users = {
   '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266': {
      password: 'adminpass',
@@ -23,34 +23,29 @@ const users = {
     role: 'MANUTENTORE_ROLE' }
   
   // Aggiungi altri utenti se necessario
-
-
 };
 
 router.post('/login', (req, res) => {
-  const { address, password } = req.body;
-  
+
+  // Login endpoint
+  const { address, password } = req.body;  
   if (!address || !password) {
     return res.status(400).json({ error: 'Address e password sono obbligatori' });
   }
-  // Normalizza l'indirizzo
-  const user = users[normalizeAddress(address)];  
+
   
+  const user = users[normalizeAddress(address)];  // Normalizza l'indirizzo  
   if (!user || user.password !== password) {
     return res.status(401).json({ error: 'Credenziali non valide' });
   }
-  // Genera il token JWT (quando viene effettuato u)
-const token = generateToken({ address,  // ad esempio "0xAbc123..."
-                               role: user.role //// ad esempio "CERTIFICATORE_ROLE" oppure "admin"
-                              });
-  // Crea JWT
-//   const token = jwt.sign(
-//     { address, role: user.role },
-//     process.env.JWT_SECRET,
-//     { expiresIn: process.env.JWT_EXPIRATION }
-//   );
+  
+const token = generateToken({
+   address,  // ad esempio "0xAbc123455666..."
+   role: user.role //// ad esempio "CERTIFICATORE_ROLE" oppure "admin"
+  });
+
 
   res.json({ token });
 });
 
-module.exports = router;
+export default router;

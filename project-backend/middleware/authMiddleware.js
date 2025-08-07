@@ -1,10 +1,8 @@
-// middleware/authMiddleware.js
-const { verifyToken } = require('../utils/jwt');
+import { verifyToken } from '../utils/jwt.js';
 
-function authMiddleware(req, res, next) {
+export default function authMiddleware(req, res, next) {
   const authHeader = req.headers['authorization'];
 
-  // Header assente o malformato
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'Token mancante o invalido' });
   }
@@ -13,11 +11,10 @@ function authMiddleware(req, res, next) {
 
   try {
     const decoded = verifyToken(token);
-    req.user = decoded; // Attach payload al request
+    req.user = decoded;
     next();
   } catch (err) {
     return res.status(401).json({ error: 'Token non valido o scaduto' });
   }
 }
 
-module.exports = authMiddleware;

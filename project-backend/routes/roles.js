@@ -1,9 +1,9 @@
-const express = require('express');
-const router = express.Router();
+import express from 'express';
+import { grantUserRole, hasUserRole } from '../services/documentRegistry.js'; // Importa i servizi per interagire con lo smart contract
+import authMiddleware from '../middleware/authMiddleware.js'; // Middleware per autenticazione
+import roleMiddleware from '../middleware/roleMiddleware.js'; // Middleware per controllare i ruoli
 
-const authMiddleware = require('../middleware/authMiddleware');
-const roleMiddleware = require('../middleware/roleMiddleware');
-const { grantUserRole, hasUserRole } = require('../services/documentRegistry');  // ⬅️ aggiunta
+const router = express.Router();
 
 /**
  * Assegna un ruolo reale via smart contract
@@ -20,7 +20,7 @@ router.post('/grant',
     }
 
     try {
-      // ✅ Nuovo: controlla se ha già il ruolo
+      // controlla se ha già il ruolo
       const alreadyHasRole = await hasUserRole(role, target);
       if (alreadyHasRole) {
         return res.json({
@@ -44,4 +44,4 @@ router.post('/grant',
     }
   });
 
-module.exports = router;
+export default router;

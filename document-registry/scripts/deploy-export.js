@@ -12,8 +12,8 @@ async function main() {
 
   // Percorsi
   const artifactPath = path.join(__dirname, "../artifacts/contracts/DocumentRegistry.sol/DocumentRegistry.json");
-  const abiDest = path.resolve(__dirname, "../../project-backend/contract/DocumentRegistry.json");
-  const addressDest = path.resolve(__dirname, "../../project-backend/contract/contract-address.json");
+  const abiDest = path.resolve(__dirname, "../../project-backend/abi/DocumentRegistry.json");
+  const addressDest = path.resolve(__dirname, "../../project-backend/abi/contract-address.json");
 
   // Copia ABI
   if (!fs.existsSync(artifactPath)) {

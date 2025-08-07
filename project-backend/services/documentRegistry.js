@@ -1,24 +1,38 @@
 // services/documentRegistry.js
-const { ethers } = require("ethers");
-const fs = require("fs");
-require("dotenv").config();
+import { ethers } from 'ethers';
+import fs from 'fs';
+import dotenv from 'dotenv';
 
-// 🧾 Carica ABI
-const contractJson = require("../contract/DocumentRegistry.json");
+dotenv.config();
+
+// Carica ABI
+const contractJson = JSON.parse(
+  fs.readFileSync(new URL('../abi/DocumentRegistry.json', import.meta.url))
+);
+//import contractJson from '../contract/DocumentRegistry.json' assert { type: 'json' };
 const abi = contractJson.abi;
 
-// 🌐 Configura provider + signer
+// Provider + Signer
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL || "http://localhost:8545");
+
 let signer;
-if (process.env.PRIVATE_KEY) {
+let contract;
+
+/**
+ * Inizializza il contratto con signer
+ */
+async function initContract() {
+ if (process.env.PRIVATE_KEY) {
   signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
 } else {
   signer = provider.getSigner();
 }
-const contractAddress = process.env.CONTRACT_ADDRESS || process.env.DOCUMENT_REGISTRY_ADDRESS;
+  const contractAddress = process.env.CONTRACT_ADDRESS || process.env.DOCUMENT_REGISTRY_ADDRESS;
+  contract = new ethers.Contract(contractAddress, abi, signer);
+}
 
-// 🔧 Inizializza il contratto
-const contract = new ethers.Contract(contractAddress, abi, signer);
+// Chiamo subito l'inizializzazione
+await initContract();
 
 /**
  * Verifica se un address ha già un ruolo
@@ -32,8 +46,10 @@ async function hasUserRole(roleName, addressToCheck) {
 }
 
 /**
- * Assegna un ruolo se non è già presente
- * @returns {Promise<string>} - hash transazione o messaggio
+ * Assegna un ruolo via smart contract
+ * @param {string} roleName
+ * @param {string} targetAddress
+ * @returns {Promise<string>} - tx hash o messaggio
  */
 async function grantUserRole(roleName, targetAddress) {
   const roleHash = ethers.id(roleName);
@@ -48,5 +64,5 @@ async function grantUserRole(roleName, targetAddress) {
   return tx.hash;
 }
 
-module.exports = { hasUserRole, grantUserRole };
-
+// Esportiamo le funzioni
+export { hasUserRole, grantUserRole };
