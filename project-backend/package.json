@@ -14,10 +14,13 @@
   "license": "MIT",
   "type": "module",
   "dependencies": {
+    "@storacha/client": "^1.7.6",
+    "@web-std/file": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "ethers": "^6.15.0",
     "express": "^5.1.0",
+    "fetch-blob": "^4.0.0",
     "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
