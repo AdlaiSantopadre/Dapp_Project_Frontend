@@ -4,15 +4,17 @@ import { File } from '@web-std/file'
 
 let client = null
 
+
 /**
  * Inizializza il client Storacha con login email, attesa piano e setup dello Space.
- */
+
 export async function initializeStoracha(email = 'adiegiuli@gmail.com') {
   client = await create()
+
+
   const account = await client.login(email)
-
   console.log('[Storacha] Login avviato. Attendo attivazione piano...')
-
+ 
   // Attende che l’utente abbia selezionato un piano (max 15 minuti)
   await account.plan.wait()
   console.log('[Storacha] Piano attivo.')
@@ -25,15 +27,21 @@ export async function initializeStoracha(email = 'adiegiuli@gmail.com') {
 
   return client
 }
-
+*/
 /**
  * Carica un file su Storacha (deve essere chiamato dopo initializeStoracha)
  */
-export async function uploadToIPFS(buffer, filename) {
+export async function getStorachaClient() {
   if (!client) {
-    throw new Error('Client non inizializzato. Chiama initializeStoracha() prima.')
+    client = await create()
+    // Prima esecuzione: farà login via mail & attesa piano (già fatto nei tuoi test)
+    // Se preferisci evitare il login qui, inizializza altrove una tantum.
   }
+  return client
+}
 
+export async function uploadToIPFS(buffer, filename) {
+  const client = await getStorachaClient()
   const file = new File([buffer], filename)
   const cid = await client.uploadFile(file)
 
