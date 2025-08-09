@@ -3,19 +3,27 @@
   "version": "1.0.0",
   "description": "Mock backend for DocumentRegistry DApp",
   "main": "app.js",
+  "type": "module",
+  "engines": { "node": ">=22" },
   "scripts": {
-    "start": "nodemon app.js",
-    "dev": "nodemon app.js",
-    "build": "echo \"No build step defined\"",
-    "test": "echo \"No tests defined\" && exit 0",
+    "start": "node src/server.mjs",
+    "start:env": "dotenv -e .env -- node src/server.mjs",
+
+    "dev": "nodemon",
+    "dev:clean": "nodemon --watch src --ext mjs,js,json src/server.mjs",
+
     "test:unit": "cross-env NODE_ENV=test TEST_E2E=0 mocha \"test/unit/**/*.test.mjs\"",
     "test:integration": "cross-env NODE_ENV=test TEST_E2E=1 mocha \"test/e2e/*.integration.test.mjs\" --timeout 120000",
-    "test:e2e": "cross-env NODE_ENV=test TEST_E2E=1 mocha \"test/e2e/*.full.test.mjs\" --timeout 120000"
+    "test:e2e": "cross-env NODE_ENV=test TEST_E2E=1 mocha \"test/e2e/*.full.test.mjs\" --timeout 120000",
+
+    "test:integration:env": "dotenv -e .env.test.e2e -- npm run test:integration",
+    "test:e2e:env": "dotenv -e .env.test.e2e -- npm run test:e2e",
+
+    "lint": "echo \"(opzionale) aggiungi eslint\" && exit 0"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
-  "type": "module",
   "dependencies": {
     "@storacha/client": "^1.7.6",
     "@web-std/file": "^3.0.3",
@@ -32,6 +40,9 @@
     "form-data": "^4.0.4",
     "mocha": "^11.7.1",
     "nodemon": "^3.1.10",
-    "supertest": "^7.1.4"
+    "supertest": "^7.1.4",
+    "cross-env": "^7.0.3",
+    "dotenv-cli": "^7.4.2"
   }
 }
+

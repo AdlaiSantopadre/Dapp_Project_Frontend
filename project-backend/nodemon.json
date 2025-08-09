@@ -1,0 +1,5 @@
+{
+  "watch": ["src"],
+  "ext": "mjs,js,json",
+  "exec": "node -r dotenv/config src/server.mjs"
+}
