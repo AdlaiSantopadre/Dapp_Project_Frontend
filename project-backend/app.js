@@ -41,3 +41,6 @@ app.listen(PORT, () => {
   console.log(`✅ Server in ascolto su http://localhost:${PORT}`);
   console.log('🌐 Provider:', process.env.RPC_URL);
 });
+
+export default app; // 8. Esporta l'app per test o altri usi
+// (es. test con supertest)

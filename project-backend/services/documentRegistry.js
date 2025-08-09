@@ -21,6 +21,7 @@ let contract;
  * Inizializza il contratto con signer
  */
 async function initContract() {
+
 // signer con chiave privata (prefisso 0x, 64 hex)
 const privateKey = process.env.PRIVATE_KEY?.trim()
 if (!privateKey || !/^0x[0-9a-fA-F]{64}$/.test(privateKey)) {
@@ -33,6 +34,7 @@ if (!contractAddress) throw new Error('CONTRACT_ADDRESS non impostato in .env')
 const contract = new ethers.Contract(contractAddress, abi, signer)
 
 console.log(`[DocumentRegistry] Contratto inizializzato: ${contractAddress}`);
+
 }
 
 // Chiamo subito l'inizializzazione

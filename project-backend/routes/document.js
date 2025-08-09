@@ -1,9 +1,7 @@
 import express from 'express'
 import multer from 'multer'
-
 import authMiddleware from '../middleware/authMiddleware.js'
 import roleMiddleware from '../middleware/roleMiddleware.js'
-
 import { uploadToIPFS } from '../services/ipfs.js'
 import { registerDocumentOnChain } from '../services/documentRegistry.js'
 import { sha256Hex } from '../utils/hash.js'
