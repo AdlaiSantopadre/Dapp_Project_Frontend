@@ -8,7 +8,7 @@ dotenv.config(); // 1. Carica variabili da .env
 
 import authRoutes from './routes/auth.js';
 import rolesRoutes from './routes/roles.js';
-import documentRoutes from './routes/document.js';
+import documentRoutes from './routes/documents.js';
 import authMiddleware from './middleware/authMiddleware.js';
 
 

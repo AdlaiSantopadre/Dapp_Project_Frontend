@@ -32,8 +32,8 @@ router.post(
       // 1) hash locale del PDF
       
       const hash = sha256Hex(buffer) // stringa esadecimale
-      console.debug('[upload] hash:', hash, 'len:', hash.length);
-      console.debug('[upload] hash chars:', [...String(hash)].map(c => c.charCodeAt(0)));
+      //console.debug('[upload] hash:', hash, 'len:', hash.length);
+      //console.debug('[upload] hash chars:', [...String(hash)].map(c => c.charCodeAt(0)));
       // 2) upload su IPFS (Storacha)
       const cid = await uploadToIPFS(buffer, originalName)
      // 3) metadata (puoi costruirli da req.body, qui un esempio minimo)
