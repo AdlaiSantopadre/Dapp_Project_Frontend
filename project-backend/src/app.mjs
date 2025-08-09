@@ -1,6 +1,6 @@
 import express from 'express';
 import fileUpload from "express-fileupload";
-import documentsRouter from "./routes/documents.js";
+import documentsRouter from "../routes/documents.js";
 
 export function createApp({ storage } = {}) {
   const app = express();
