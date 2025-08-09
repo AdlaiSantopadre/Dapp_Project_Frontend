@@ -44,7 +44,7 @@ const token = generateToken({
    role: user.role //// ad esempio "CERTIFICATORE_ROLE" oppure "admin"
   });
 
-
+  console.log("Login OK:", address, "role:", user.role);
   res.json({ token });
 });
 

@@ -30,8 +30,10 @@ router.post(
       const originalName = req.file.originalname || 'document.pdf'
 
       // 1) hash locale del PDF
+      
       const hash = sha256Hex(buffer) // stringa esadecimale
-
+      console.debug('[upload] hash:', hash, 'len:', hash.length);
+      console.debug('[upload] hash chars:', [...String(hash)].map(c => c.charCodeAt(0)));
       // 2) upload su IPFS (Storacha)
       const cid = await uploadToIPFS(buffer, originalName)
      // 3) metadata (puoi costruirli da req.body, qui un esempio minimo)
@@ -47,9 +49,9 @@ router.post(
     * @returns {Promise<string>} - tx hash della transazione
     */
       // 4) registrazione on-chain del CID (e hash)
-      const txHash = await registerDocumentOnChain(cid, hash, metadata)
+      const { txHash }= await registerDocumentOnChain( hash, cid, metadata)
 
-      // 4) risposta
+      // 5) risposta
       res.json({
         cid,
         txHash,

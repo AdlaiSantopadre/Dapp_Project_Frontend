@@ -1,3 +1,17 @@
+
+before(async () => {
+  await fetch('http://127.0.0.1:8545', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'hardhat_reset',
+      params: []
+    })
+  });
+});
+
 import request from 'supertest'
 import { expect } from 'chai'
 import fs from 'fs'
@@ -50,12 +64,14 @@ describe('E2E /documents/upload', () => {
       'manutentorepass'
     )
 
-    const pdfPath = path.join(process.cwd(), 'test', 'fixtures', 'sample.pdf')
+    //const pdfPath = path.join(process.cwd(), 'test', 'fixtures', 'sample.pdf')
     const res = await request(app)
       .post('/documents/upload')
       .set('Authorization', `Bearer ${token}`)
-      .attach('file', pdfPath)
+      .send(); // non allego file, ma il middleware multer lo gestisce
 
-    expect(res.status).to.equal(403)
+    expect(res.status).to.equal(403,request.text)
+    expect(res.body).to.match
+
   })
 })

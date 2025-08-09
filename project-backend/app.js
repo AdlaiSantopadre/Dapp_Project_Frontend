@@ -1,6 +1,7 @@
 // app.js
 
 import express from 'express';
+const app = express(); // 2. Crea istanza server
 import cors from 'cors';
 import dotenv from 'dotenv';
 dotenv.config(); // 1. Carica variabili da .env
@@ -10,7 +11,7 @@ import rolesRoutes from './routes/roles.js';
 import documentRoutes from './routes/document.js';
 import authMiddleware from './middleware/authMiddleware.js';
 
-const app = express(); // 2. Crea istanza server
+
 
 
 // 3. Middleware globali
@@ -34,13 +35,17 @@ app.get('/protected', authMiddleware, (req, res) => {
     user: req.user
   });
 });
-
-const PORT = process.env.PORT || 3000;
-// 7. Avvio server
-app.listen(PORT, () => {
-  console.log(`✅ Server in ascolto su http://localhost:${PORT}`);
-  console.log('🌐 Provider:', process.env.RPC_URL);
+// 7. Gestione errori (handler globale)
+app.use((err, req, res, next) => {
+  console.error('Errore:', err);
+  res.status(500).json({ error: 'Errore interno del server' });
 });
+
+// 8. Avvio server eccetto test
+if (process.env.NODE_ENV !== 'test') {
+  const PORT = process.env.PORT || 3000
+  app.listen(PORT, () => console.log(`Server on http://localhost:${PORT}`))
+}
 
 export default app; // 8. Esporta l'app per test o altri usi
 // (es. test con supertest)
