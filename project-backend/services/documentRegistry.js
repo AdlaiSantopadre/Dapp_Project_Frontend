@@ -104,12 +104,20 @@ async function grantUserRole(roleName, targetAddress) {
  * @returns {Promise<object>} informazioni transazione
  */
 async function registerDocumentOnChain(sha256HexString, cid, metadata = '{}') {
-  console.log(`[upload] hash: ${sha256HexString} len: ${sha256HexString?.length}`);
-  // converti hex string (64 char) in bytes32
-  // "0x" + 64 hex
+console.log(`[registerDocumentOnChain] input hash: ${sha256HexString}, cid: ${cid}`);
+  // converti hex string (64 char) in bytes32  
   const hashBytes32 = toBytes32(sha256HexString);
-  const tx = await contract.registerDocument(hashBytes32, cid, metadata)
-  const receipt = await tx.wait()
-  return { txHash: receipt?.hash || tx.hash }
+//  di default non registra nulla su blockchain
+  let txHash = null;
+
+  if (process.env.REGISTER_ONCHAIN === '1') {
+  const tx = await contract.registerDocument(hashBytes32, cid, metadata);
+  tx = await contract.registerDocument(hashBytes32, cid, metadata);
+  const receipt = await tx.wait();
+  txHash = receipt?.hash || tx.hash;
+  }
+  return { cid, hash: sha256HexString, txHash };
+  console.log(`[registerDocumentOnChain] hash: ${hashBytes32} cid: ${cid} metadata: ${metadata}`);
+
 }
 export { hasUserRole, grantUserRole, registerDocumentOnChain };

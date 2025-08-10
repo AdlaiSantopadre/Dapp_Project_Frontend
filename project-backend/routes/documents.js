@@ -62,7 +62,7 @@ export default function documentsRouter({ storage }) {
         })
 
         // 4) Registrazione su blockchain
-        const txHash = await registerDocumentOnChain(cid, hash, metadata)
+        const txHash = await registerDocumentOnChain(hash, cid, metadata)
 
         return res.status(200).json({ cid, hash, txHash })
       } catch (err) {
