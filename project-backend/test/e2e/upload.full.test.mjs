@@ -1,21 +1,31 @@
 import http from "node:http";
-import request from "supertest";
 import path from "node:path";
 import fs from "node:fs/promises";
-import { createApp } from "../../src/app.mjs";
-import { makeStorachaClient } from "../../src/storage/storacha.mjs";
+import request from "supertest";
+import assert from "node:assert/strict";
 
-describe("E2E (Full) server + Storacha", function () {
+
+
+import { createApp } from "../../src/app.mjs";
+import { makeStorage } from "../../services/ipfsService.js";
+
+describe("E2E (Full) server.listen + Storacha", function () {
   this.timeout(120000);
 
-  let server, base;
+  /** @type {import('http').Server} */
+  let server;
+  /** @type {string} */
+  let base;
 
   before(async () => {
-    if (process.env.TEST_E2E !== "1") throw new Error("TEST_E2E=1 required");
-    const app = createApp({ storage: makeStorachaClient() });
+    if (process.env.TEST_E2E !== "1") {
+        throw new Error("TEST_E2E=1 required for real IPFS");
+   }
+    const app = createApp({ storage: makeStorage() });
     server = http.createServer(app);
-    await new Promise(res => server.listen(0, res));
-    const { port } = server.address();
+    await new Promise(res => server.listen(0, "127.0.0.1",  res));
+    const { port } = /** @type {{port:number}} */ (server.address());
+    
     base = `http://127.0.0.1:${port}`;
   });
 
@@ -25,10 +35,19 @@ describe("E2E (Full) server + Storacha", function () {
 
   it("uploads PDF and returns CID", async () => {
     const pdfPath = path.resolve("test/fixtures/sample.pdf");
+    const buf = await fs.readFile(pdfPath);
     const res = await request(base)
       .post("/documents/upload")
-      .attach("document", await fs.readFile(pdfPath), "sample.pdf")
+      .attach("file", buf, "sample.pdf")
       .expect(200);
-    if (!res.body?.cid) throw new Error("CID missing");
+    assert.ok(res.body?.cid, "CID missing in response");
+    assert.match(res.body.cid, /^bafy/i, "CID unexpected (does not start with 'bafy')");
+  });
+
+  it("rejects when file is missing", async () => {
+    const res = await request(base)
+      .post("/documents/upload")
+      .expect(400);
+    assert.equal(res.body?.error, "Nessun file caricato");
   });
 });

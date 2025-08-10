@@ -1,77 +1,41 @@
+import request from "supertest";
+import assert from "node:assert/strict";
+import path from "node:path";
+import fs from "node:fs/promises";
 
-before(async () => {
-  await fetch('http://127.0.0.1:8545', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({
-      jsonrpc: '2.0',
-      id: 1,
-      method: 'hardhat_reset',
-      params: []
-    })
+import { createApp } from "../../src/app.mjs";
+
+describe("E2E /documents/upload (Mock storage)", function () {
+  this.timeout(30000);
+
+  // Storage finto compatibile con la firma put({ name, data, size, mimetype })
+  const mockStorage = {
+    async put({ name, data, size, mimetype }) {
+      if (!data || !size) throw new Error("invalid mock data");
+      return { cid: "bafyMOCKcid", size };
+    }
+  };
+
+  let app;
+
+  before(() => {
+    app = createApp({ storage: mockStorage });
+  });
+
+  it("returns a mock CID with a valid file", async () => {
+    const pdfPath = path.resolve("test/fixtures/sample.pdf");
+    const buf = await fs.readFile(pdfPath);
+
+    const res = await request(app)
+      .post("/documents/upload")
+      .attach("file", buf, { filename: "sample.pdf", contentType: "application/pdf" })
+      .expect(200);
+
+    assert.equal(res.body.cid, "bafyMOCKcid");
+  });
+
+  it("rejects when missing file", async () => {
+    const res = await request(app).post("/documents/upload").expect(400);
+    assert.equal(res.body?.error, "Nessun file caricato");
   });
 });
-
-import request from 'supertest'
-import { expect } from 'chai'
-import fs from 'fs'
-import path from 'path'
-import app from '../../app.js'
-
-// Utility per ottenere un JWT “vero” chiamando la tua /auth/login
-async function getToken(address, password) {
-  const res = await request(app)
-    .post('/auth/login')
-    .send({ address, password })
-  expect(res.status).to.equal(200)
-  expect(res.body).to.have.property('token')
-  return res.body.token
-}
-
-/**
- * E2E:
- * - login come CERTIFICATORE
- * - POST /documents/upload con file
- * - assert su { cid, txHash, uploadedBy, hash, ipfsGateway }
- */
-describe('E2E /documents/upload', () => {
-  it('carica PDF, mock IPFS, registra on-chain e risponde 200', async () => {
-    // Usa uno degli utenti mock con ruolo CERTIFICATORE_ROLE
-    // es: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8' / 'certificatorepass'
-    const token = await getToken(
-      '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
-      'certificatorepass'
-    )
-
-    const pdfPath = path.join(process.cwd(), 'test', 'fixtures', 'sample.pdf')
-    const res = await request(app)
-      .post('/documents/upload')
-      .set('Authorization', `Bearer ${token}`)
-      .attach('file', pdfPath)
-
-    expect(res.status).to.equal(200)
-    expect(res.body).to.have.keys(['cid', 'txHash', 'uploadedBy', 'hash', 'ipfsGateway'])
-    expect(res.body.cid).to.be.a('string')
-    expect(res.body.txHash).to.match(/^0x[a-fA-F0-9]{64}$/)
-    expect(res.body.hash).to.match(/^[a-f0-9]{64}$/)
-    expect(res.body.uploadedBy).to.be.a('string')
-  })
-
-  it('rifiuta senza ruolo CERTIFICATORE_ROLE (403)', async () => {
-    // utente senza ruolo (adatta all’utente mock)
-    const token = await getToken(
-      '0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc', // MANUTENTORE_ROLE nel tuo mock
-      'manutentorepass'
-    )
-
-    //const pdfPath = path.join(process.cwd(), 'test', 'fixtures', 'sample.pdf')
-    const res = await request(app)
-      .post('/documents/upload')
-      .set('Authorization', `Bearer ${token}`)
-      .send(); // non allego file, ma il middleware multer lo gestisce
-
-    expect(res.status).to.equal(403,request.text)
-    expect(res.body).to.match
-
-  })
-})
