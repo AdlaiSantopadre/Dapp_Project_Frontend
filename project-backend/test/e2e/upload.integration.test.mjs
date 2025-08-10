@@ -5,7 +5,7 @@ import fs from "node:fs/promises";
 import assert from "node:assert/strict";
 
 import { createApp } from "../../src/app.mjs";
-import { makeStoraget } from "../../src/services/ipfsService.js";
+import { makeStorage } from "../../services/ipfsService.js";
 
 describe("E2E documents/upload (Integration , real Storacha", function () {
   this.timeout(120000);
