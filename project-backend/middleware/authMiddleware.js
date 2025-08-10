@@ -1,13 +1,18 @@
-if (process.env.BYPASS_AUTH === "1") {
-  req.user = { email: "test@example.com", roles: ["CERTIFICATORE_ROLE"] };
-  return next();
-}
+
 
 
 
 import { verifyToken } from '../utils/jwt.js';
 
 export default function authMiddleware(req, res, next) {
+  if (process.env.BYPASS_AUTH === "1") {
+  req.user = { 
+    email: "test@example.com",
+    role: "CERTIFICATORE_ROLE",
+    address: "0xAbc123455666..." // Simula un indirizzo
+      };
+  return next();
+ }
   const authHeader = req.headers['authorization'];
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {

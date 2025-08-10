@@ -6,10 +6,10 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 dotenv.config(); // 1. Carica variabili da .env
 
-import authRoutes from './routes/auth.js';
-import rolesRoutes from './routes/roles.js';
-import documentRoutes from './routes/documents.js';
-import authMiddleware from './middleware/authMiddleware.js';
+import authRoutes from '../project-backend/routes/auth.js';
+import rolesRoutes from '../project-backend/routes/roles.js';
+import documentRoutes from '../project-backend/routes/documents.js';
+import authMiddleware from '../project-backend/middleware/authMiddleware.js';
 
 
 
