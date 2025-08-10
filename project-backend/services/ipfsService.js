@@ -36,7 +36,7 @@ function makeStorachaClient() {
   });
 
   return {
-    async put(file) {
+    async put({ name, data, size, mimetype }) {
       const cid = await client.uploadFile({
         name: file.name,
         stream: () => bufferToStream(file.data),
