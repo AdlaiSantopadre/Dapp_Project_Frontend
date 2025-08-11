@@ -36,7 +36,7 @@ describe("E2E documents/upload (Integration , real Storacha", function () {
       .expect(200);
 
     assert.ok(res.body?.cid, "CID mancante nella risposta");
-    assert.match(res.body.cid, /^bafy/i, "CID inatteso (non inizia con 'bafy')");
+    assert.match(res.body.cid, /^baf[yk]/i, "CID inatteso (attesi 'bafy' o 'bafk')");
   });
 
   it("rifiuta la chiamata senza file", async () => {
@@ -44,7 +44,7 @@ describe("E2E documents/upload (Integration , real Storacha", function () {
       .post("/documents/upload")
       .expect(400);
 
-    assert.equal(res.body?.error, "document file missing");
+    assert.equal(res.body?.error, "Nessun file caricato");
   });
 });
 

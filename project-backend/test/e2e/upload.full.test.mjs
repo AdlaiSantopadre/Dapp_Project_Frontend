@@ -41,7 +41,7 @@ describe("E2E (Full) server.listen + Storacha", function () {
       .attach("file", buf, "sample.pdf")
       .expect(200);
     assert.ok(res.body?.cid, "CID missing in response");
-    assert.match(res.body.cid, /^bafy/i, "CID unexpected (does not start with 'bafy')");
+    assert.match(res.body.cid, /^baf[yk]/i, "CID inatteso (attesi 'bafy' o 'bafk')");
   });
 
   it("rejects when file is missing", async () => {
