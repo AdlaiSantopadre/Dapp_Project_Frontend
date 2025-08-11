@@ -11,56 +11,65 @@ const contractJson = JSON.parse(
 //import contractJson from '../contract/DocumentRegistry.json' assert { type: 'json' };
 const abi = contractJson.abi;
 
-// Provider + Signer
-const provider = new ethers.JsonRpcProvider(process.env.RPC_URL || "http://localhost:8545");
-
-
-
-
-/**
- * Normalizza e valida una stringa SHA-256 hex in formato bytes32 per Solidity.
- * @param {string} hexish - hash esadecimale (64 char, opzionale prefisso 0x)
- * @returns {string} stringa in formato 0x...
- */
-function toBytes32(hexish) {
-  let s = String(hexish).trim(); // forza a stringa e rimuove spazi
-  if (s.startsWith("0x")) s = s.slice(2); // rimuove eventuale prefisso 0x
-  if (s.length !== 64) {
-    throw new Error(`sha256HexString non valido: attesi 64 caratteri, ricevuti ${s.length}`);
-  }
-  if (!/^[0-9a-fA-F]{64}$/.test(s)) {
-    throw new Error("sha256HexString non valido: caratteri non esadecimali");
-  }
-  return "0x" + s.toLowerCase();
-}
-
-
+// Provider (v6)
+let provider;
 let signer;
 let contract;
+let initialized = false;
 
-/**
- * Inizializza il contratto con signer
- */
-async function initContract() {
+async function ensureContract() {
+  if (initialized && contract) return;
 
-// signer con chiave privata (prefisso 0x, 64 hex)
-const privateKey = process.env.PRIVATE_KEY?.trim()
-if (!privateKey || !/^0x[0-9a-fA-F]{64}$/.test(privateKey)) {
-  throw new Error('PRIVATE_KEY mancante o formattata male (deve iniziare con 0x ed essere 64 hex).')
+  const RPC_URL = process.env.RPC_URL;
+  const PRIVATE_KEY = process.env.PRIVATE_KEY?.trim();
+  const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
+
+  if (!RPC_URL) throw new Error('RPC_URL mancante');
+  if (!PRIVATE_KEY || !/^0x[0-9a-fA-F]{64}$/.test(PRIVATE_KEY)) {
+    throw new Error('PRIVATE_KEY mancante o malformattata (0x + 64 hex)');
+  }
+  if (!CONTRACT_ADDRESS) throw new Error('CONTRACT_ADDRESS mancante');
+
+  // crea provider/signer/contract
+  provider = new ethers.JsonRpcProvider(RPC_URL);
+  signer = new ethers.Wallet(PRIVATE_KEY, provider);
+  const c = new ethers.Contract(CONTRACT_ADDRESS, abi, signer);
+
+  // verifica minima e finalizza
+  await c.getAddress(); // throws se address/abi non validi
+  contract = c;
+  initialized = true;
+  console.log('[DocumentRegistry] Contratto inizializzato:', CONTRACT_ADDRESS);
 }
-signer = new ethers.Wallet(privateKey, provider)
 
-const contractAddress = process.env.CONTRACT_ADDRESS
-if (!contractAddress) throw new Error('CONTRACT_ADDRESS non impostato in .env')
-
-contract = new ethers.Contract(contractAddress, abi, signer)
-
-console.log(`[DocumentRegistry] Contratto inizializzato: ${contractAddress}`);
-
+function toBytes32(hexish) {
+  let s = String(hexish).trim();
+  if (s.startsWith('0x')) s = s.slice(2);
+  if (s.length !== 64) throw new Error(`sha256HexString non valido: attesi 64 caratteri, ricevuti ${s.length}`);
+  if (!/^[0-9a-fA-F]{64}$/.test(s)) throw new Error('sha256HexString non valido: caratteri non esadecimali');
+  return '0x' + s.toLowerCase();
 }
 
-// Chiamo subito l'inizializzazione
-await initContract();
+ async function registerDocumentOnChain(sha256HexString, cid, metadata='{}') {
+  // se non devi registrare on-chain, esci pulito
+  if (process.env.REGISTER_ONCHAIN !== '1') {
+    return { cid, hash: sha256HexString, txHash: null };
+  }
+
+  await ensureContract();
+
+  if (!contract) {
+    throw new Error('Contract non inizializzato (controlla RPC_URL/PRIVATE_KEY/CONTRACT_ADDRESS)');
+  }
+
+  const hashBytes32 = toBytes32(sha256HexString);
+  const tx = await contract.registerDocument(hashBytes32, cid, metadata);
+  const receipt = await tx.wait();
+  const txHash = receipt?.hash || tx.hash || null;
+
+  return { cid, hash: sha256HexString, txHash };
+}
+
 
 /**
  * Verifica se un address ha già un ruolo
@@ -90,34 +99,7 @@ async function grantUserRole(roleName, targetAddress) {
   const tx = await contract.grantRole(roleHash, targetAddress);
   await tx.wait();
   return tx.hash;
-}
+}  
 
 
-
-
-// 🚀 nuovo: registra il documento on-chain
-/**
- * Registra un documento su blockchain
- * @param {string} cid - CID IPFS
- * @param {string} sha256HexString - hash SHA256 in formato esadecimale (64 char)
- * @param {string} metadata - metadati opzionali
- * @returns {Promise<object>} informazioni transazione
- */
-async function registerDocumentOnChain(sha256HexString, cid, metadata = '{}') {
-console.log(`[registerDocumentOnChain] input hash: ${sha256HexString}, cid: ${cid}`);
-  // converti hex string (64 char) in bytes32  
-  const hashBytes32 = toBytes32(sha256HexString);
-//  di default non registra nulla su blockchain
-  let txHash = null;
-
-  if (process.env.REGISTER_ONCHAIN === '1') {
-  const tx = await contract.registerDocument(hashBytes32, cid, metadata);
-  tx = await contract.registerDocument(hashBytes32, cid, metadata);
-  const receipt = await tx.wait();
-  txHash = receipt?.hash || tx.hash;
-  }
-  return { cid, hash: sha256HexString, txHash };
-  console.log(`[registerDocumentOnChain] hash: ${hashBytes32} cid: ${cid} metadata: ${metadata}`);
-
-}
 export { hasUserRole, grantUserRole, registerDocumentOnChain };
