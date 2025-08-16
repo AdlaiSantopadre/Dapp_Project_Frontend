@@ -11,7 +11,7 @@ const contractJson = JSON.parse(
 //import contractJson from '../contract/DocumentRegistry.json' assert { type: 'json' };
 const abi = contractJson.abi;
 
-// Provider (v6)
+// Provider (v6) ->Stato modulo
 let provider;
 let signer;
 let contract;

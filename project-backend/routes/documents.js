@@ -1,31 +1,27 @@
-import express from 'express'
-import multer from 'multer'
-import authMiddleware from '../middleware/authMiddleware.js'
-import roleMiddleware from '../middleware/roleMiddleware.js'
-import { registerDocumentOnChain } from '../services/documentRegistry.js'
-import { sha256Hex } from '../utils/hash.js'
+import express from 'express';
+import multer from 'multer';
+import authMiddleware from '../middleware/authMiddleware.js';
+import roleMiddleware from '../middleware/roleMiddleware.js';
+import { registerDocumentOnChain } from '../services/documentRegistry.js';
+import { sha256Hex } from '../utils/hash.js';
 
-/**
- * Factory che crea un Router per /documents
- * @param {Object} deps
- * @param {Object} deps.storage - servizio di storage IPFS/Storacha, con metodo async put(fileBuffer, filename)
- * @returns {express.Router}
- */
 export default function documentsRouter({ storage }) {
   if (!storage || typeof storage.put !== 'function') {
-    throw new Error("documentsRouter: storage.put function required");
+    throw new Error('documentsRouter: storage.put function required');
   }
 
-  const router = express.Router()
+  const router = express.Router();
 
-  // multer in memoria: req.file.buffer
-  const upload = multer({ storage: multer.memoryStorage() })
+  // Limiti e filtro: solo PDF, max 20MB (regola tu)
+  const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 20 * 1024 * 1024 },
+    fileFilter: (_req, file, cb) => {
+      const ok = (file.mimetype || '').toLowerCase() === 'application/pdf' || /\.pdf$/i.test(file.originalname || '');
+      cb(ok ? null : new Error('Solo PDF ammessi'), ok);
+    },
+  });
 
-  /**
-   * POST /documents/upload
-   * Form-data: file (PDF)
-   * Header: Authorization: Bearer <JWT>
-   */
   router.post(
     '/upload',
     authMiddleware,
@@ -34,43 +30,66 @@ export default function documentsRouter({ storage }) {
     async (req, res) => {
       try {
         if (!req.file) {
-          return res.status(400).json({ error: 'Nessun file caricato' })
+          return res.status(400).json({ error: 'Nessun file caricato (atteso campo form-data "file")' });
         }
         if (!req.user) {
-          return res.status(401).json({ error: 'Utente non autenticato' })
+          return res.status(401).json({ error: 'Utente non autenticato' });
         }
 
-        const buffer = req.file.buffer
-        const originalName = req.file.originalname || 'document.pdf'
+        // indirizzo utente (dal token)
+        const ethAddress = req.user.ethAddress || req.user.address || null;
+        if (!ethAddress) {
+          return res.status(400).json({ error: 'Wallet address mancante nel token (ethAddress)' });
+        }
 
-        // 1) Hash locale del PDF
-        const hash = sha256Hex(buffer)
+        const buffer = req.file.buffer;
+        const originalName = req.file.originalname || 'document.pdf';
+        const mime = req.file.mimetype || 'application/pdf';
 
-        // 2) Upload su IPFS (Storacha) tramite storage iniettato
-        const { cid } = await storage.put({
+        // 1) Hash locale del PDF (per immutabilità)
+        const hash = sha256Hex(buffer);
+
+        // 2) Upload su IPFS/Storacha
+        const putResult = await storage.put({
           name: originalName,
           data: buffer,
           size: buffer.length,
-          mimetype: req.file.mimetype || 'application/pdf'
-        })
+          mimetype: mime,
+        });
+        const cid = putResult?.cid;
+        if (!cid) {
+          return res.status(502).json({ error: 'Upload su storage fallito (CID assente)' });
+        }
 
-        // 3) Metadata (puoi costruirli da req.body, qui un esempio minimo)
+        // 3) Metadata minimi (evita PII, mantieni tracciabilità tecnica)
         const metadata = JSON.stringify({
           filename: originalName,
-          mime: req.file.mimetype || 'application/pdf',
-          uploadedBy: req.user?.address || req.user?.email || 'unknown'
-        })
+          mime,
+          uploadedBy: ethAddress,
+          at: new Date().toISOString(),
+        });
 
-        // 4) Registrazione su blockchain
-        const txHash = await registerDocumentOnChain(hash, cid, metadata)
+        // 4) Registrazione on-chain
+        const txHash = await registerDocumentOnChain(hash, cid, metadata);
+        if (!txHash) {
+          return res.status(502).json({ error: 'Registrazione on-chain fallita (txHash assente)' });
+        }
 
-        return res.status(200).json({ cid, hash, txHash })
+        return res.status(201).json({ cid, hash, txHash });
       } catch (err) {
-        console.error('[upload] error:', err)
-        return res.status(500).json({ error: 'Upload fallito' })
+        // errori da multer (limiti/filtro)
+        if (err?.message === 'Solo PDF ammessi') {
+          return res.status(415).json({ error: 'Formato non supportato: è richiesto un PDF' });
+        }
+        if (err?.code === 'LIMIT_FILE_SIZE') {
+          return res.status(413).json({ error: 'File troppo grande' });
+        }
+
+        console.error('[documents/upload] error:', err);
+        return res.status(500).json({ error: 'Upload fallito' });
       }
     }
-  )
+  );
 
-  return router
+  return router;
 }

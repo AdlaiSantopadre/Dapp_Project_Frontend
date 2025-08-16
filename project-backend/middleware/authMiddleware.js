@@ -1,32 +1,23 @@
+// project-backend/middleware/authMiddleware.js
+import { createRemoteJWKSet, jwtVerify } from 'jose';
 
+const JWKS = createRemoteJWKSet(new URL(process.env.AUTH_JWKS_URL));
 
-
-
-import { verifyToken } from '../utils/jwt.js';
-
-export default function authMiddleware(req, res, next) {
-  if (process.env.BYPASS_AUTH === "1") {
-  req.user = { 
-    email: "test@example.com",
-    role: "CERTIFICATORE_ROLE",
-    address: "0xAbc123455666..." // Simula un indirizzo
-      };
-  return next();
- }
-  const authHeader = req.headers['authorization'];
-
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'Token mancante o invalido' });
+export default async function authMiddleware(req, res, next) {
+  if (process.env.BYPASS_AUTH === '1') {
+    req.user = { id: '0', username: 'test', role: 'CERTIFICATORE_ROLE', ethAddress: '0xAbc...' };
+    return next();
   }
-
-  const token = authHeader.split(' ')[1];
+  const auth = req.headers.authorization || '';
+  if (!auth.startsWith('Bearer ')) return res.status(401).json({ error: 'Token mancante o invalido' });
 
   try {
-    const decoded = verifyToken(token);
-    req.user = decoded;
+    const token = auth.slice(7);
+    const { payload } = await jwtVerify(token, JWKS, { algorithms: ['RS256'] });
+    // Mantieni compat: address ⇄ ethAddress
+    req.user = { ...payload, address: payload.address || payload.ethAddress, ethAddress: payload.ethAddress || payload.address };
     next();
-  } catch (err) {
-    return res.status(401).json({ error: 'Token non valido o scaduto' });
+  } catch {
+    res.status(401).json({ error: 'Token non valido o scaduto' });
   }
 }
-

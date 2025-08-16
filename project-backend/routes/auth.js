@@ -1,51 +1,27 @@
-// routes/auth.js
 import express from 'express';
-import { generateToken } from '../utils/jwt.js'; // Importa la funzione per generare il token
-import { normalizeAddress } from '../utils/normalize.js'; // Importa la funzione per normalizzare l'indirizzo
 
 const router = express.Router();
+const AUTH_SERVER_URL = process.env.AUTH_SERVER_URL || 'http://localhost:8081';
 
-//const SECRET = process.env.JWT_SECRET || "supersegreta";
+router.post('/login', async (req, res) => {
+  try {
+    const resp = await fetch(`${AUTH_SERVER_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(req.body),
+    });
 
-// Utenti mock: address → { password, ruolo } 
-// users ATTENZIONE ALLE STRINGHE ADDRESS: (LOWERCASE)
-const users = {
-  '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266': {
-     password: 'adminpass',
-      role: 'admin' 
-      },
-  '0x70997970c51812dc3a010c7d01b50e0d17dc79c8': {
-    password: 'certificatorepass',  
-    role: 'CERTIFICATORE_ROLE'
-  },
-  '0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc': {
-    password: 'manutentorepass',
-    role: 'MANUTENTORE_ROLE' }
-  
-  // Aggiungi altri utenti se necessario
-};
-
-router.post('/login', (req, res) => {
-
-  // Login endpoint
-  const { address, password } = req.body;  
-  if (!address || !password) {
-    return res.status(400).json({ error: 'Address e password sono obbligatori' });
+    const data = await resp.json();
+    if (!resp.ok) {
+      return res.status(resp.status).json(data); // { error: ... }
+    }
+    // data = { token, user }
+    return res.json(data);
+  } catch (err) {
+    console.error('[AUTH PROXY] errore:', err);
+    return res.status(502).json({ error: 'Auth-server non raggiungibile' });
   }
-
-  
-  const user = users[normalizeAddress(address)];  // Normalizza l'indirizzo  
-  if (!user || user.password !== password) {
-    return res.status(401).json({ error: 'Credenziali non valide' });
-  }
-  
-const token = generateToken({
-   address,  // ad esempio "0xAbc123455666..."
-   role: user.role //// ad esempio "CERTIFICATORE_ROLE" oppure "admin"
-  });
-
-  console.log("Login OK:", address, "role:", user.role);
-  res.json({ token });
 });
 
 export default router;
+
