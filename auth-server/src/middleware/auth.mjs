@@ -1,10 +1,16 @@
 // src/middleware/auth.mjs
 import { createPublicKey } from 'node:crypto';
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
 import { jwtVerify } from 'jose';
 
-const publicPem = readFileSync(process.env.JWT_PUBLIC_KEY_PATH, 'utf8');
-const publicKey = createPublicKey(publicPem);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Carica il file JWK pubblico
+const publicJwkPath = process.env.JWK_PUBLIC_PATH || resolve(__dirname, '..\keys\jwk.public.json');
+const publicKey = JSON.parse(readFileSync(publicJwkPath, 'utf8'));
 
 export function requireAuth() {
   return async (req, res, next) => {

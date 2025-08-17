@@ -7,7 +7,7 @@ import { loginLimiter } from '../middleware/rateLimit.mjs';
 import { validate } from '../middleware/validate.mjs';
 import { db } from '../db/userRepository.js'; // ✅ usa MongoDB
 import { signJwt } from '../utils/jwt.mjs';
-import { KID } from '../utils/jwks.mjs'; // ✅ importa il KID usato nel JWT
+
 
 const router = Router();
 
@@ -24,7 +24,8 @@ router.post(
     const { username, password } = req.body;
     const user = await db.verifyCredentials(username, password);
     if (!user) return res.status(401).json({ error: 'Credenziali non valide' });
-    const token = await signJwt(user, { kid: KID });
+    // Firma JWT leggendo privJwk + kid già gestiti in jwt.mjs
+    const token = await signJwt({ sub: user.id, role: user.role });
     res.json({ token, user });
   })
 );

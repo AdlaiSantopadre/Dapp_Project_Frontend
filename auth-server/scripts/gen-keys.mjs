@@ -25,9 +25,9 @@ jwkPriv.use = 'sig';
 jwkPriv.alg = 'RS256';
 jwkPriv.kid = kid;
 
-writeFileSync(`${outDir}/public.jwk.json`, JSON.stringify(jwkPub, null, 2));
-writeFileSync(`${outDir}/private.jwk.json`, JSON.stringify(jwkPriv, null, 2));
+writeFileSync(`${outDir}/jwks.public.json`, JSON.stringify(jwkPub, null, 2));
+writeFileSync(`${outDir}/jwks.private.json`, JSON.stringify(jwkPriv, null, 2));
 writeFileSync(`${outDir}/jwks.json`, JSON.stringify({ keys: [jwkPub] }, null, 2));
 
-console.log('✅ JWK generati in auth-server/keys (public.jwk.json, private.jwk.json, jwks.json)');
+console.log('✅ JWK generati in auth-server/keys (jwks.public.json, jwks.private.json, jwks.json)');
 console.log('   kid:', kid);
