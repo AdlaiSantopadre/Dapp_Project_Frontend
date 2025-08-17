@@ -7,25 +7,27 @@ export const db = {
     const users = await getUsersCollection();
     const user = await users.findOne({ username });
     if (!user ) return null;
+
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) return null;
     return {
       id: user._id.toString(),
       username: user.username,
-      roles: user.roles,
+      role: user.role,
       address: user.address,
     };
   },
 
-  async createUser({ username, password, role, address }) {
-    
+  async createUser({ username, password, role, address }) {    
     const users = await getUsersCollection();
+
     const exists = await users.findOne({ username });
     if (exists) throw new Error('Utente già esistente');
+
     const passwordHash = await bcrypt.hash(password, 10);
-    const user = { username, password, role, address,createdAt:new Date() }
+    const userToInsert = { username, passwordHash, role, address,createdAt:new Date() }
     ;
-    const { insertedId } = await users.insertOne(user);
+    const { insertedId } = await users.insertOne(userToInsert);
     return {
       id: insertedId.toString(),
       username,
