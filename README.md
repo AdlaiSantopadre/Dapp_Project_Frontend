@@ -4,7 +4,7 @@ Questo progetto gestisce una DApp per la registrazione decentralizzata di docume
 
 ...
 
-##  Licenza
+## Licenza
 
 MIT – Tutto il codice è libero e riutilizzabile.
 
@@ -19,4 +19,4 @@ Remove-Item -Force package-lock.json
 *elimina il file package-lock.json in modo silenzioso
 
 npm ci
-npm run mostra gli script eseguibili 
+npm run mostra gli script eseguibili

@@ -38,5 +38,12 @@ export const db = {
   async listUsers() {
     const users = await getUsersCollection();
     return await users.find({}).project({ password: 0,passwordHash: 0 }).toArray();
-  }
+  },
+  async  findUserByUsername(username) {
+    const users = await getUsersCollection();
+    
+  return users.findOne({ username });
+}
+
 };
+

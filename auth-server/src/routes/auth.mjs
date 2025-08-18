@@ -37,6 +37,17 @@ router.post(
   requireAuth(),
   requireRole('ADMIN_ROLE'),
   asyncHandler(async (req, res) => {
+
+    const { username } = req.body;
+    //check if user already exists
+    
+
+    const existing = await db.findUserByUsername(username);
+    if (existing) {
+      return res.status(409).json({ error: 'Utente già esistente' });
+    } 
+
+
     const user = await db.createUser(req.body); // puoi validare con Zod
     res.status(201).json({ user });
   })
