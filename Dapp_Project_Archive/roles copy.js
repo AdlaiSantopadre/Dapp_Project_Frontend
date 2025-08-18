@@ -1,7 +1,7 @@
 import express from 'express';
-import { grantUserRole, hasUserRole } from '../services/documentRegistry.js'; // Importa i servizi per interagire con lo smart contract
-import authMiddleware from '../middleware/authMiddleware.js'; // Middleware per autenticazione
-import roleMiddleware from '../middleware/roleMiddleware.js'; // Middleware per controllare i ruoli
+import { grantUserRole, hasUserRole } from '../project-backend/services/documentRegistry.js'; // Importa i servizi per interagire con lo smart contract
+import authMiddleware from '../project-backend/middleware/authMiddleware.js'; // Middleware per autenticazione
+import roleMiddleware from '../project-backend/middleware/roleMiddleware.js'; // Middleware per controllare i ruoli
 
 const router = express.Router();
 

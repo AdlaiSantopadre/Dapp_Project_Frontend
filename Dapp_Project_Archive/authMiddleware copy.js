@@ -2,7 +2,7 @@
 
 
 
-import { verifyToken } from '../utils/jwt.js';
+import { verifyToken } from '../project-backend/utils/jwt.js';
 
 export default function authMiddleware(req, res, next) {
   if (process.env.BYPASS_AUTH === "1") {

@@ -1,7 +1,7 @@
 // routes/auth.js
 import express from 'express';
-import { generateToken } from '../utils/jwt.js'; // Importa la funzione per generare il token
-import { normalizeAddress } from '../utils/normalize.js'; // Importa la funzione per normalizzare l'indirizzo
+import { generateToken } from '../project-backend/utils/jwt.js'; // Importa la funzione per generare il token
+import { normalizeAddress } from '../project-backend/utils/normalize.js'; // Importa la funzione per normalizzare l'indirizzo
 
 const router = express.Router();
 
