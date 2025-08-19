@@ -1,46 +1,38 @@
 import 'package:flutter/material.dart';
-import 'config.dart'; // Assicurati di avere il file config.dart nella stessa cartella
-import 'qr_scan_page.dart'; // Assicurati di avere il file qr_scan.page.dart nella stessa cartella
+import 'package:provider/provider.dart';
+import 'state/auth_state.dart';
+import 'pages/login_page.dart';
+import 'pages/home_page.dart';
+import 'pages/documents_page.dart';
+import 'pages/upload_page.dart';
 
-void main() => runApp(const MyApp());
+void main() {
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => AuthState()..bootstrap(),
+      child: const MyApp(),
+    ),
+  );
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthState>();
+    final startRoute = auth.isAuthenticated ? '/home' : '/login';
+
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Doc Registry',
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: Colors.indigo,
-      ),
-      home: const HomePage(),
+      title: 'DApp Frontend',
+      initialRoute: startRoute,
+      routes: {
+        '/login': (_) => const LoginPage(),
+        '/home' : (_) => const HomePage(),
+        '/documents': (_) => const DocumentsPage(),
+        '/upload': (_) => const UploadPage(),
+      },
     );
   }
 }
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Doc Registry (staging)')),
-      body: Center(
-        child:ElevatedButton(
-          onPressed: () {
-            Navigator.of(context).push(
-                MaterialPageRoute(
-                    builder: (context) => QrScanPage(
-                        backendBaseUrl: baseUrl,
-                        jwt: jwt, // oppure await getToken() se dinamico
-                  ),
-                ),
-            );
-          },
-          child: const Text('Scansiona QR 📷'),
-          ),
-      ),
-    );
-  }
-}

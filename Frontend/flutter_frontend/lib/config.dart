@@ -1,2 +1,6 @@
-const String baseUrl = 'http://192.168.1.50:8080';  // oppure Railway URL se online
-const String jwt = '<INSERISCI_JWT_TEST>';          // oppure da login, file, memoria// per BASE_URL e JWT
+class AppConfig {
+  static const authBaseUrl =
+      String.fromEnvironment('AUTH_BASE_URL', defaultValue: 'http://127.0.0.1:8081/auth');
+  static const apiBaseUrl =
+      String.fromEnvironment('API_BASE_URL', defaultValue: 'http://127.0.0.1:8081');
+} 
