@@ -90,6 +90,32 @@ export default function documentsRouter({ storage }) {
       }
     }
   );
+  router.get(
+  '/:cid',
+  authMiddleware,
+  roleMiddleware(['MANUTENTORE_ROLE', 'ISPETTORE_ROLE', 'TITOLARE_ROLE']),
+  async (req, res) => {
+    try {
+      const { cid } = req.params;
+      if (!cid) {
+        return res.status(400).json({ error: 'CID mancante' });
+      }
+      
+      const file = await storage.get(cid);
+      if (!file || !file.data) return res.status(404).json({ error: 'Documento non trovato' });
+      // Imposta gli header per il download
+      // Imposta intestazioni corrette
+        res.setHeader('Content-Type', file.mimetype || 'application/pdf');
+        res.setHeader('Content-Disposition', `inline; filename="${file.name || 'documento.pdf'}"`);
+
+      return res.send(file.data);
+    } catch (err) {
+      console.error('[documents/get] error:', err);
+      res.status(500).json({ error: 'Download fallito' });
+    }
+  }
+);
+
 
   return router;
 }

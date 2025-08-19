@@ -96,7 +96,24 @@ function makeStorachaClient() {
       }
       return { cid: String(cid), size: fileSize };
     },
+    /**
+     * get(cid) → { name, data (Buffer), mimetype }
+     */
+    async get(cid) {
+      if (!cid) throw new Error('ipfsService.get: CID mancante');
 
+      const client = await clientP;
+      const file = await client.downloadFile(cid);
+      if (!file) throw new Error(`ipfsService.get: file non trovato per CID ${cid}`);
+
+      const buf = Buffer.from(await file.arrayBuffer());
+
+      return {
+        name: file.name || `${cid}.pdf`,
+        data: buf,
+        mimetype: file.type || 'application/pdf',
+      };
+    },
     // (opzionale) health check semplice
     async health() {
       try {
@@ -115,8 +132,14 @@ export function makeStorage() {
     ? makeStorachaClient()
     : {
         async put() {
-          // MOCK deterministico
           return { cid: 'bafyMOCKcid', size: 0 };
+        },
+        async get(cid) {
+          return {
+            name: 'mock.pdf',
+            data: Buffer.from('%PDF-1.4\n%mock\n', 'utf8'), // file PDF fake
+            mimetype: 'application/pdf',
+          };
         },
       };
 }

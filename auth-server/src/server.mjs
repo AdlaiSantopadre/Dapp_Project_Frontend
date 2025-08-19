@@ -15,6 +15,7 @@ app.use(express.json());
 app.use(morgan('dev'));
 
 app.get('/.well-known/jwks.json', async (req, res) => {
+  res.set('Cache-Control', 'public, max-age=300, immutable');
   res.json(await getJWKS());
 });
 

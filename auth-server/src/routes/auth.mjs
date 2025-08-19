@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { asyncHandler } from '../middleware/asyncHandler.mjs';
-import { requireAuth } from '../middleware/auth.mjs';
+import { requireAuth } from '../middleware/auth-copy.mjs';
 import { requireRole } from '../middleware/roles.mjs';
 import { loginLimiter } from '../middleware/rateLimit.mjs';
 import { validate } from '../middleware/validate.mjs';
