@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "node --watch src/server.mjs",
     "start": "node src/server.mjs",
-    "gen:keys": "node scripts/gen-keys.mjs"
+    "gen:keys": "node scripts/gen-keys.mjs",
+    "mongo:start": "docker start mongo || docker run -d --name mongo -p 27017:27017 -v mongo:/data/db mongo:7",
+    "mongo:stop": "docker stop mongo"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

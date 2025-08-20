@@ -3,9 +3,9 @@ import cors from 'cors';
 import morgan from 'morgan';
 import helmet from 'helmet';
 
-import rolesRouter from './routes/roles.js';
-import documentsRouter from './routes/documents.js';
-import authMiddleware from './middleware/authMiddleware.js';
+import rolesRouter from '../routes/roles.js';
+import documentsRouter from '../routes/documents.js';
+import authMiddleware from '../middleware/authMiddleware.js';
 
 export function createApp({ storage }) {
   if (!storage) throw new Error("Missing storage instance");
