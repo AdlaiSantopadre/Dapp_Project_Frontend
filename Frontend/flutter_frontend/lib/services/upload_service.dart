@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'api_client.dart';
+
 //Assumo che il tuo backend accetti un campo file in multipart/form-data.
 class UploadService {
   final _api = ApiClient();
@@ -18,7 +19,11 @@ class UploadService {
     if (res.statusCode == 200) {
       return res.data as Map<String, dynamic>;
     } else {
-      throw Exception('Errore upload documento');
+  throw DioException(
+    requestOptions: res.requestOptions,
+    response: res,
+    type: DioExceptionType.badResponse,
+    );
     }
   }
 }

@@ -8,17 +8,19 @@ class ApiClient {
   ApiClient._internal(this.dio);
 
   factory ApiClient() {
-    final dio = Dio(BaseOptions(
+    final dio = Dio(
+      BaseOptions(
       baseUrl: AppConfig.apiBaseUrl,
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 20),
     ));
-
-    dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) async {
-        final token = await SecureStore.token;
-        if (token != null && token.isNotEmpty) {
-          options.headers['Authorization'] = 'Bearer $token';
+// Interceptor per token JWT
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          final token = await SecureStore.token;
+          if (token != null && token.isNotEmpty) {
+            options.headers['Authorization'] = 'Bearer $token';
         }
         handler.next(options);
       },
@@ -29,6 +31,15 @@ class ApiClient {
         handler.next(e);
       },
     ));
+ // Interceptor di log (debug)
+    dio.interceptors.add(
+      LogInterceptor(
+        request: true,
+        requestBody: true,
+        responseBody: true,
+        responseHeader: false,
+      ),
+    );
 
     return ApiClient._internal(dio);
   }
