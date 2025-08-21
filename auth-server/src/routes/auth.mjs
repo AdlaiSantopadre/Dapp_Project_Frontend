@@ -25,7 +25,9 @@ router.post(
     const user = await db.verifyCredentials(username, password);
     if (!user) return res.status(401).json({ error: 'Credenziali non valide' });
     // Firma JWT leggendo privJwk + kid già gestiti in jwt.mjs
-    const token = await signJwt({ sub: user.id, role: user.role });
+    const token = await signJwt({ sub: user.id,
+                                   role: user.role,
+                                   address: user.address });
     res.json({ token, user });
   })
 );
