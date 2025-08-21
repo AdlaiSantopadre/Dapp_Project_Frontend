@@ -7,12 +7,14 @@ class UploadService {
   Future<Map<String, dynamic>> uploadPdf(String filePath) async {
     final fileName = filePath.split('/').last;
 
+    print("DEBUG: Uploading file $fileName from $filePath");
+
     final formData = FormData.fromMap({
       'file': await MultipartFile.fromFile(filePath, filename: fileName),
     });
 
     final res = await _api.dio.post('/documents/upload', data: formData);
-
+    print("DEBUG: Response status ${res.statusCode}, data: ${res.data}");
     if (res.statusCode == 200) {
       return res.data as Map<String, dynamic>;
     } else {
