@@ -28,7 +28,7 @@ class UploadService {
           if (total > 0) {
             final pct = (sent / total * 100).toStringAsFixed(0);
             // Log leggero: rimuovi se troppo verboso
-            // print('⏫ Upload: $pct% ($sent/$total bytes)');
+            print('⏫ Upload: $pct% ($sent/$total bytes)');
           }
         },
       );

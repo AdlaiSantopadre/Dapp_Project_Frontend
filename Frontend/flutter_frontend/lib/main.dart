@@ -5,6 +5,7 @@ import 'pages/login_page.dart';
 import 'pages/home_page.dart';
 import 'pages/documents_page.dart';
 import 'pages/upload_page.dart';
+import 'pages/register_document_screen.dart'; 
 
 void main() {
   runApp(
@@ -31,6 +32,7 @@ class MyApp extends StatelessWidget {
         '/home' : (_) => const HomePage(),
         '/documents': (_) => const DocumentsPage(),
         '/upload': (_) => const UploadPage(),
+        '/register_document': (_) => const RegisterDocumentScreen(),
       },
     );
   }
