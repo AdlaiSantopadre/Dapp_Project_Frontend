@@ -69,13 +69,14 @@ export default function documentsRouter({ storage }) {
           at: new Date().toISOString(),
         });
 
+        /* 
         // 4) Registrazione on-chain
-        const txHash = await registerDocumentOnChain(hash, cid, metadata);
-        if (!txHash) {
-          return res.status(502).json({ error: 'Registrazione on-chain fallita (txHash assente)' });
-        }
+         const txHash = await registerDocumentOnChain(hash, cid, metadata);
+         if (!txHash) {
+           return res.status(502).json({ error: 'Registrazione on-chain fallita (txHash assente)' });
+         }*/
 
-        return res.status(201).json({ cid, hash, txHash });
+        return res.status(201).json({ cid, hash,metadata, /*txHash*/  });
       } catch (err) {
         // errori da multer (limiti/filtro)
         if (err?.message === 'Solo PDF ammessi') {

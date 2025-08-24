@@ -4,7 +4,6 @@ import '../services/document_registry_service.dart';
 import 'package:provider/provider.dart';
 import '../state/auth_state.dart';
 
-
 class RegisterDocumentScreen extends StatefulWidget {
   const RegisterDocumentScreen({super.key});
 
@@ -30,7 +29,7 @@ class _RegisterDocumentScreenState extends State<RegisterDocumentScreen> {
     // 1) Istanzia AppKit Modal (UI/connessione wallet)
     _appKitModal = ReownAppKitModal(
       context: context,
-      projectId: 'bd05ce3bcca3f62a5f3aab11b3346224', 
+      projectId: 'bd05ce3bcca3f62a5f3aab11b3346224',
       metadata: const PairingMetadata(
         name: 'DApp Frontend',
         description: 'Document Registry dApp',
@@ -38,11 +37,9 @@ class _RegisterDocumentScreenState extends State<RegisterDocumentScreen> {
         icons: ['https://example.com/icon.png'],
         redirect: Redirect(
           native: 'mydapp://',
-          universal: 'https://example.com/app', // utile per Link Mode
-          // linkMode: true, // opzionale
+          universal: 'https://example.com/app',
         ),
       ),
-      // enableAnalytics: true,
     );
 
     // 2) Istanzia il service del contratto
@@ -50,30 +47,18 @@ class _RegisterDocumentScreenState extends State<RegisterDocumentScreen> {
       contractAddress: '0x742c0D167Db6E45EA5Ef6543Ab85774921644709',
       abiJson: '''
       [
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "hash",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "string",
-        "name": "cid",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "metadata",
-        "type": "string"
-      }
-    ],
-    "name": "registerDocument",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  }
-]
+        {
+          "inputs": [
+            {"internalType":"bytes32","name":"hash","type":"bytes32"},
+            {"internalType":"string","name":"cid","type":"string"},
+            {"internalType":"string","name":"metadata","type":"string"}
+          ],
+          "name":"registerDocument",
+          "outputs":[],
+          "stateMutability":"nonpayable",
+          "type":"function"
+        }
+      ]
       ''',
     );
 
@@ -82,6 +67,19 @@ class _RegisterDocumentScreenState extends State<RegisterDocumentScreen> {
       await _appKitModal.init();
       setState(() {});
     });
+  }
+
+  /// ✅ Recupera i dati dal provider AuthState
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final auth = context.read<AuthState>();
+
+    if (auth.lastHash != null) {
+      _hashCtl.text = auth.lastHash!;
+      _cidCtl.text = auth.lastCid ?? '';
+      _metaCtl.text = auth.lastMetadata ?? '';
+    }
   }
 
   @override
@@ -96,46 +94,33 @@ class _RegisterDocumentScreenState extends State<RegisterDocumentScreen> {
   Future<void> _doRegister() async {
     final auth = context.read<AuthState>();
 
-  if (auth.role != 'CERTIFICATORE_ROLE') {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Solo i certificatori possono registrare documenti.')),
-    );
-    return;
-  }
+    if (auth.role != 'CERTIFICATORE_ROLE') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Solo i certificatori possono registrare documenti.')),
+      );
+      return;
+    }
 
+    if (!auth.isAuthenticated) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Effettua il login')),
+      );
+      return;
+    }
 
-
-
-  if (!auth.isAuthenticated) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Effettua il login')),
-    );
-    return;
-  }
-  // 1) Ruolo richiesto (adatta al tuo caso)
-  final roleOk = auth.role == 'CERTIFICATORE_ROLE';
-  if (!roleOk) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Ruolo non autorizzato all’upload')),
-    );
-    return;
-  }
-
-  // 2) Address match JWT ↔ MetaMask
-  final chain = _appKitModal.selectedChain!;
-  final nsInfo = NamespaceUtils.getNamespaceFromChain(chain.chainId);
-  final mmAddr = _appKitModal.session!.getAddress(nsInfo)?.toLowerCase();
-  final jwtAddr = auth.ethAddress?.toLowerCase();
-
-  if (mmAddr == null || mmAddr != jwtAddr) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Address mismatch: JWT=$jwtAddr vs Wallet=$mmAddr')),
-    );
-    return;
-  }
-  
-
-
+    // Address match JWT ↔ MetaMask
+    
+    final chain = _appKitModal.selectedChain!;
+    final nsInfo = NamespaceUtils.getNamespaceFromChain(chain.chainId);
+    final mmAddr = _appKitModal.session!.getAddress(nsInfo)?.toLowerCase();
+    final jwtAddr = auth.ethAddress?.toLowerCase();
+    
+    if (mmAddr == null || mmAddr != jwtAddr) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Address mismatch: JWT=$jwtAddr vs Wallet=$mmAddr')),
+      );
+      return;
+    }
 
     if (!_appKitModal.isConnected) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -156,19 +141,24 @@ class _RegisterDocumentScreenState extends State<RegisterDocumentScreen> {
     });
 
     try {
+      // garantiamo che l’hash abbia il prefisso 0x
+      var hashHex = _hashCtl.text.trim();
+      if (!hashHex.startsWith('0x')) {
+        hashHex = '0x$hashHex';
+      }
+
       final tx = await _svc.registerDocumentWithAppKit(
         _appKitModal,
-        hashHex: _hashCtl.text.trim(),
+        hashHex: hashHex,
         cid: _cidCtl.text.trim(),
         metadata: _metaCtl.text.trim(),
       );
       setState(() => _txHash = tx);
 
-      // Aggiorna bilancio/identità mostrati dal modal (utile dopo tx)
       await _appKitModal.loadAccountData();
       ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('✅ Documento registrato!')),
-    );
+        const SnackBar(content: Text('✅ Documento registrato!')),
+      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Errore: $e')),
@@ -189,25 +179,19 @@ class _RegisterDocumentScreenState extends State<RegisterDocumentScreen> {
         padding: const EdgeInsets.all(16),
         child: ListView(
           children: [
-            // Pulsanti pronti di AppKit (connect / network / account)
             Row(
-                children: [
-                  AppKitModalNetworkSelectButton(appKit: _appKitModal, context: context),
-                  const SizedBox(width: 12),
-                  AppKitModalConnectButton(appKit: _appKitModal, context: context),
-                  const SizedBox(width: 12),
-                  if (_appKitModal.isConnected)
-                      AppKitModalAccountButton(appKitModal: _appKitModal, context: context),
-          ],
-    
+              children: [
+                AppKitModalNetworkSelectButton(appKit: _appKitModal, context: context),
+                const SizedBox(width: 12),
+                AppKitModalConnectButton(appKit: _appKitModal, context: context),
+                const SizedBox(width: 12),
+                if (_appKitModal.isConnected)
+                  AppKitModalAccountButton(appKitModal: _appKitModal, context: context),
+              ],
             ),
             const SizedBox(height: 12),
             Text('Stato: ${connected ? "Connesso" : "Disconnesso"} — Chain: ${chain ?? "-"}'),
-
             const Divider(height: 24),
-
-            const Divider(height: 24),
-
             TextField(
               controller: _hashCtl,
               decoration: const InputDecoration(
@@ -229,13 +213,11 @@ class _RegisterDocumentScreenState extends State<RegisterDocumentScreen> {
               ),
               maxLines: 3,
             ),
-
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _busy ? null : _doRegister,
               child: _busy ? const CircularProgressIndicator() : const Text('Invia transazione'),
             ),
-
             if (_txHash != null) ...[
               const SizedBox(height: 16),
               SelectableText('txHash: $_txHash'),

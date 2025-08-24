@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
         '/home' : (_) => const HomePage(),
         '/documents': (_) => const DocumentsPage(),
         '/upload': (_) => const UploadPage(),
-        '/register_document': (_) => const RegisterDocumentScreen(),
+        '/register': (_) => const RegisterDocumentScreen(),
       },
     );
   }

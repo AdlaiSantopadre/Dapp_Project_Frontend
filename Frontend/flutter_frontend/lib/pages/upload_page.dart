@@ -2,6 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import '../services/upload_service.dart';
+import 'package:provider/provider.dart';
+import '../state/auth_state.dart';
+
 
 class UploadPage extends StatefulWidget {
   const UploadPage({super.key});
@@ -37,9 +40,21 @@ class _UploadPageState extends State<UploadPage> {
     });
     try {
       final res = await _service.uploadPdf(_selectedFile!.path);
+      // ✅ salva i dati nel provider AuthState
+      final auth = context.read<AuthState>();
+      auth.setLastDocument(
+        hash: res['hash'],
+        cid: res['cid'],
+        metadata: res['metadata'] ?? '{"name":"${_selectedFile!.path.split('/').last}","mime":"application/pdf"}',
+      );
+
       setState(() {
         _result = "✅ Upload riuscito!\nCID: ${res['cid']}\nTx: ${res['txHash']}";
       });
+      // ✅ dopo upload vai direttamente a RegisterDocumentScreen
+      if (mounted) {
+        Navigator.of(context).pushNamed('/register');
+      }
     } catch (e) {
       setState(() {
         _result = "❌ Errore: $e";

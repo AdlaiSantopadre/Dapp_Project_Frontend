@@ -18,6 +18,26 @@ class AuthState extends ChangeNotifier {
   String? get username => _username;
   String? get ethAddress => _eth;
 
+   // ✅ Nuovi campi per ultimo documento
+  String? _lastHash;
+  String? _lastCid;
+  String? _lastMetadata;
+
+  String? get lastHash => _lastHash;
+  String? get lastCid => _lastCid;
+  String? get lastMetadata => _lastMetadata;
+
+  void setLastDocument({
+    required String hash,
+    required String cid,
+    required String metadata,
+  }) {
+    _lastHash = hash;
+    _lastCid = cid;
+    _lastMetadata = metadata;
+    notifyListeners();
+  }
+
   Future<void> bootstrap() async {
     _token    = await SecureStore.token;
     _role     = await SecureStore.role;
@@ -41,6 +61,10 @@ class AuthState extends ChangeNotifier {
 
   Future<void> logout() async {
     await _auth.logout();
+    // ✅ reset anche i dati documento quando fai logout
+    _lastHash = null;
+    _lastCid = null;
+    _lastMetadata = null;
     await bootstrap();
   }
 

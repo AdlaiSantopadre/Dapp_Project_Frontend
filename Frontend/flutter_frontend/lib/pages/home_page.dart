@@ -41,14 +41,22 @@ class HomePage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             // Pulsante Upload visibile solo per CERTIFICATORE_ROLE
-            if (auth.hasRole('CERTIFICATORE_ROLE'))
+            if (auth.hasRole('CERTIFICATORE_ROLE')) ...[
               ElevatedButton(
                 onPressed: () {
-                 
                   Navigator.of(context).pushNamed('/upload');
                 },
                 child: const Text('Carica documento (Certificatore)'),
               ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/register');
+                },
+                child: const Text('Registra su blockchain'),
+            
+              ),
+          ],
           ],
         ),
       ),
