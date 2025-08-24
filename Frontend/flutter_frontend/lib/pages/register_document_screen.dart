@@ -3,7 +3,7 @@ import 'package:reown_appkit/reown_appkit.dart';
 import '../services/document_registry_service.dart';
 import 'package:provider/provider.dart';
 import '../state/auth_state.dart';
-
+import 'qr_code_page.dart'; // Per visualizzare il QR code dopo la registrazione
 class RegisterDocumentScreen extends StatefulWidget {
   const RegisterDocumentScreen({super.key});
 
@@ -213,7 +213,7 @@ class _RegisterDocumentScreenState extends State<RegisterDocumentScreen> {
               ),
               maxLines: 3,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             ElevatedButton(
               onPressed: _busy ? null : _doRegister,
               child: _busy ? const CircularProgressIndicator() : const Text('Invia transazione'),
@@ -222,6 +222,29 @@ class _RegisterDocumentScreenState extends State<RegisterDocumentScreen> {
               const SizedBox(height: 16),
               SelectableText('txHash: $_txHash'),
             ],
+            ElevatedButton(
+              onPressed: () {
+                final cid = _cidCtl.text.trim();
+                final txHash = _txHash ?? '';
+
+                if (cid.isEmpty || txHash.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("CID o TxHash mancanti")),
+                );
+                    return;
+              }
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                      builder: (_) => QrCodePage(
+                      cid: cid,       // il CID ricevuto dall’upload
+                      txHash: txHash, // l’hash della transazione
+                        ),
+                      ),
+                    );
+                },
+              child: const Text("Genera QR Code"),
+            ),
           ],
         ),
       ),
