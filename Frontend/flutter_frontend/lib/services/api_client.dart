@@ -26,6 +26,7 @@ class ApiClient {
       },
       onError: (e, handler) async {
         if (e.response?.statusCode == 401) {
+          print("⚠️ ApiClient: 401, clear token");
           await SecureStore.clear();
         }
         handler.next(e);

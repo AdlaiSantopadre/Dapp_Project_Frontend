@@ -4,6 +4,7 @@ import morgan from 'morgan';
 import helmet from 'helmet';
 
 import rolesRouter from '../routes/roles.js';
+import impiantiRoutes from './routes/impianti.js';
 import documentsRouter from '../routes/documents.js';
 import authMiddleware from '../middleware/authMiddleware.js';
 
@@ -17,7 +18,7 @@ export function createApp({ storage }) {
   app.use(morgan('dev'));
 
   app.get('/healthz', (_req, res) => res.json({ ok: true }));
-
+  app.use('/impianti', impiantiRoutes);//route per impianti configurati
   app.use('/roles', rolesRouter);
   app.use('/documents', authMiddleware, documentsRouter({ storage }));
 

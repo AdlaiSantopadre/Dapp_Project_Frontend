@@ -1,10 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../state/auth_state.dart';
+import '../services/api_client.dart';
+import '../services/impianti_service.dart'; 
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+  class _HomePageState extends State<HomePage> {
+  List<dynamic> _impianti = [];
+  String? _selectedImpianto;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadImpianti();
+  }
+  Future<void> _loadImpianti() async {
+    try {
+      final impianti = await ImpiantiService().listImpianti();
+      setState(() => _impianti = impianti);
+    } catch (e) {
+      print("Errore caricamento impianti: $e");
+      if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Errore caricamento impianti: $e")),
+        );
+      }
+    }
+  }
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthState>();
@@ -33,13 +60,23 @@ class HomePage extends StatelessWidget {
             Text('Ruolo: ${auth.role ?? '-'}'),
             Text('ETH: ${auth.ethAddress ?? '-'}'),
             const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pushNamed('/documents');
+             // 👇 Dropdown per scegliere impianto
+            DropdownButton<String>(
+              value: _selectedImpianto,
+              hint: const Text("Seleziona impianto"),
+              items: _impianti.map<DropdownMenuItem<String>>((impianto) {
+                return DropdownMenuItem<String>(
+                  value: impianto['_id'],
+                  child: Text(impianto['nome']),
+                );
+              }).toList(),
+              onChanged: (val) {
+                setState(() => _selectedImpianto = val);
+                context.read<AuthState>().setImpiantoId(val!);
               },
-              child: const Text('Visualizza Documenti'),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
+            
             // Pulsante Upload visibile solo per CERTIFICATORE_ROLE
             if (auth.hasRole('CERTIFICATORE_ROLE')) ...[
               ElevatedButton(

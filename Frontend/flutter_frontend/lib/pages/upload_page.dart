@@ -34,6 +34,14 @@ class _UploadPageState extends State<UploadPage> {
 
   Future<void> _uploadFile() async {
     if (_selectedFile == null) return;
+
+    final auth = context.read<AuthState>();
+    if (auth.selectedImpiantoId == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Seleziona prima un impianto in Home")),
+    );
+    return;
+    }
     setState(() {
       _loading = true;
       _result = null;
@@ -41,7 +49,7 @@ class _UploadPageState extends State<UploadPage> {
     try {
       final res = await _service.uploadPdf(_selectedFile!.path);
       // ✅ salva i dati nel provider AuthState
-      final auth = context.read<AuthState>();
+      
       auth.setLastDocument(
         hash: res['hash'],
         cid: res['cid'],
@@ -68,12 +76,38 @@ class _UploadPageState extends State<UploadPage> {
 
   @override
   Widget build(BuildContext context) {
+     final auth = context.watch<AuthState>();
     return Scaffold(
       appBar: AppBar(title: const Text('Carica Documento')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // ✅ Mostra impianto selezionato
+          Card(
+            color: Colors.grey[100],
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  const Icon(Icons.factory, color: Colors.blue),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      auth.selectedImpiantoId != null
+                          ? "Impianto selezionato: ${auth.selectedImpiantoId}"
+                          : "⚠️ Nessun impianto selezionato (sceglilo in Home)",
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+
             ElevatedButton(
               onPressed: _pickFile,
               child: const Text('Scegli PDF'),

@@ -13,6 +13,8 @@ class AuthState extends ChangeNotifier {
   String? _username;
   String? _eth;
 
+  
+
   String? get token => _token;
   String? get role => _role;
   String? get username => _username;
@@ -37,12 +39,22 @@ class AuthState extends ChangeNotifier {
     _lastMetadata = metadata;
     notifyListeners();
   }
+  // ✅ Nuovo campo per impianto selezionato
+  String? _selectedImpiantoId;
+  String? get selectedImpiantoId => _selectedImpiantoId;
+
+  void setImpiantoId(String id) {
+    _selectedImpiantoId = id;
+    notifyListeners();
+  }
 
   Future<void> bootstrap() async {
     _token    = await SecureStore.token;
     _role     = await SecureStore.role;
     _username = await SecureStore.username;
     _eth      = await SecureStore.ethAddress;
+
+    //_selectedImpiantoId = await SecureStore.read("impiantoId");
     notifyListeners();
   }
 
@@ -65,6 +77,7 @@ class AuthState extends ChangeNotifier {
     _lastHash = null;
     _lastCid = null;
     _lastMetadata = null;
+     _selectedImpiantoId = null;
     await bootstrap();
   }
 

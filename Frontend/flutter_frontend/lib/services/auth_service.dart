@@ -11,7 +11,7 @@ import 'secure_store.dart';
 
 class AuthService {
   final Dio _dio = Dio(BaseOptions(baseUrl: AppConfig.authBaseUrl));
-  final ApiClient _api = ApiClient();
+  final ApiClient api = ApiClient();
 
   Future<void> login(String username, String password) async {
     // 1) Chiamo /auth/login → ricevo { token, user }

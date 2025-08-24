@@ -1,0 +1,23 @@
+[
+  {
+    "_id": "IMPIANTO-001",
+    "nome": "Centrale Termica Alfa",
+    "indirizzo": "Via Roma 45, Milano",
+    "titolare": "Società XYZ",
+    "note": "Impianto ad uso industriale"
+  },
+  {
+    "_id": "IMPIANTO-002",
+    "nome": "Cabina Elettrica Beta",
+    "indirizzo": "Strada Statale 23, Torino",
+    "titolare": "Enel Distribuzione",
+    "note": "Cabina MT/BT"
+  },
+  {
+    "_id": "IMPIANTO-003",
+    "nome": "Impianto Fotovoltaico Gamma",
+    "indirizzo": "Contrada Sole 12, Bari",
+    "titolare": "Green Power Srl",
+    "note": "Parco solare 2MW"
+  }
+]
