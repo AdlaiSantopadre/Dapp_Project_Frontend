@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../state/auth_state.dart';
-import '../services/api_client.dart';
 import '../services/impianti_service.dart'; 
 
 class HomePage extends StatefulWidget {

@@ -52,10 +52,12 @@ class _LoginPageState extends State<LoginPage> {
                         _userCtrl.text.trim(),
                         _passCtrl.text.trim(),
                       );
-                      if (!mounted) return;
                       if (!ok) {
                         setState(() => _error = 'Credenziali non valide o server non raggiungibile.');
-                      } else if (mounted) {
+                      if (!mounted) return;
+                      
+                        
+                      } else if (context.mounted  ) {
                         Navigator.of(context).pushReplacementNamed('/home');
                       }
                     }

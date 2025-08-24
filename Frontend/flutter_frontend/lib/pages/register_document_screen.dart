@@ -156,6 +156,7 @@ class _RegisterDocumentScreenState extends State<RegisterDocumentScreen> {
       setState(() => _txHash = tx);
 
       await _appKitModal.loadAccountData();
+      if (!mounted) return;  // per sicurezza
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('✅ Documento registrato!')),
       );

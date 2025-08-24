@@ -1,10 +1,19 @@
 {
-	"folders": [
-		{
-			"path": "."
-		}
-	],
-	"settings": {
-		"java.configuration.updateBuildConfiguration": "interactive"
-	}
+  "folders": [
+    {
+      "path": "document-registry"
+    },
+    {
+      "path": "project-backend"
+    },
+    {
+      "path": "Frontend/flutter_frontend"
+    }
+  ],
+  "settings": {
+    // Impostazioni opzionali per Flutter/Dart
+    "dart.flutterSdkPath": "C:/src/flutter",
+    "dart.sdkPath": "C:/src/flutter/bin/cache/dart-sdk"
+  }
 }
+
