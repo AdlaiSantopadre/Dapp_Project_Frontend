@@ -4,7 +4,7 @@ import morgan from 'morgan';
 import helmet from 'helmet';
 
 import rolesRouter from '../routes/roles.js';
-import impiantiRoutes from './routes/impianti.js';
+import impiantiRoutes from '../routes/impianti.js';
 import documentsRouter from '../routes/documents.js';
 import authMiddleware from '../middleware/authMiddleware.js';
 
