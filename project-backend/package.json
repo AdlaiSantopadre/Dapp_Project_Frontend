@@ -10,7 +10,6 @@
   "scripts": {
     "start": "node src/server.mjs",
     "dev": "dotenv -e .env -- node src/server.mjs",
-    
     "dev:clean": "nodemon --watch src --ext mjs,js,json src/server.mjs",
     "test:mock": "cross-env NODE_ENV=test BYPASS_AUTH=1 mocha \"test/e2e/upload.e2e.test.mjs\" --timeout 30000",
     "test:unit": "cross-env NODE_ENV=test TEST_E2E=0 mocha \"test/unit/**/*.test.mjs\"",
@@ -18,10 +17,10 @@
     "test:e2e": "cross-env NODE_ENV=test TEST_E2E=1 BYPASS_AUTH=1 mocha \"test/e2e/*.full.test.mjs\" --timeout 120000",
     "test:integration:env": "dotenv -e .env.test.e2e -- npm run test:integration",
     "test:e2e:env": "dotenv -e .env.test.e2e -- npm run test:e2e",
+    "test:archivio": "mocha test/archivioDocumenti.test.mjs --timeout 10000 --reporter spec",
     "lint": "echo \"(opzionale) aggiungi eslint\" && exit 0",
     "mongo:start": "docker start mongo || docker run -d --name mongo -p 27017:27017 -v mongo:/data/db mongo:7",
     "mongo:stop": "docker stop mongo"
-     
   },
   "keywords": [],
   "author": "",
@@ -34,14 +33,16 @@
     "dotenv": "^17.2.1",
     "ethers": "^6.15.0",
     "express": "^5.1.0",
+    "express-async-handler": "^1.2.0",
     "express-rate-limit": "^8.0.1",
     "fetch-blob": "^4.0.0",
     "helmet": "^8.1.0",
     "jose": "^6.0.12",
     "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.18.0",
     "morgan": "^1.10.1",
     "multer": "^2.0.2",
-    "zod": "^4.0.17"
+    "zod": "^4.1.3"
   },
   "devDependencies": {
     "chai": "^5.2.1",

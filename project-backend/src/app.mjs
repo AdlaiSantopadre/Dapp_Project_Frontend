@@ -7,6 +7,8 @@ import rolesRouter from '../routes/roles.js';
 import impiantiRoutes from '../routes/impianti.js';
 import documentsRouter from '../routes/documents.js';
 import authMiddleware from '../middleware/authMiddleware.js';
+import archivioDocumentiRouter from '../routes/archivioDocumenti.js';
+
 
 export function createApp({ storage }) {
   if (!storage) throw new Error("Missing storage instance");
@@ -20,7 +22,8 @@ export function createApp({ storage }) {
   app.get('/healthz', (_req, res) => res.json({ ok: true }));
   app.use('/impianti', impiantiRoutes);//route per impianti configurati
   app.use('/roles', rolesRouter);
-  app.use('/documents', authMiddleware, documentsRouter({ storage }));
+  app.use('/documents', authMiddleware, documentsRouter({ storage })); //route per upload documenti
+  app.use('/archivio-documenti', archivioDocumentiRouter);//route per gestione archivio documenti
 
   return app;
 }

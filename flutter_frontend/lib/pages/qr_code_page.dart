@@ -13,7 +13,8 @@ class QrCodePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String ipfsUrl = "https://w3s.link/ipfs/$cid";
+    
+    final String  ipfsUrl = "https://$cid.ipfs.w3s.link";
     final String sepoliaTxUrl = "https://sepolia.etherscan.io/tx/$txHash";
 
     return Scaffold(

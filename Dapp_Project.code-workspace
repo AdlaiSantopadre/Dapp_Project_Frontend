@@ -7,6 +7,9 @@
       "path": "project-backend"
     },
     {
+      "path": "auth-server"
+    },
+    {
       "path": "flutter_frontend"
     }
   ],

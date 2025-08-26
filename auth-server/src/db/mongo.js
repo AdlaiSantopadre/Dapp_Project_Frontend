@@ -20,4 +20,3 @@ export async function getUsersCollection() {
   const db = await connectToDb();
   return db.collection('users');
 }
-
