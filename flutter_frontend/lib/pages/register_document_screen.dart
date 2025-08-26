@@ -238,6 +238,7 @@ class _RegisterDocumentScreenState extends State<RegisterDocumentScreen> {
                       context,
                       MaterialPageRoute(
                       builder: (_) => QrCodePage(
+                      impiantoId: context.read<AuthState>().selectedImpiantoId ?? "",
                       cid: cid,       // il CID ricevuto dall’upload
                       txHash: txHash, // l’hash della transazione
                         ),
