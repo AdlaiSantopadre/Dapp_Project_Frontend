@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_frontend/services/upload_service.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../state/auth_state.dart';
@@ -37,13 +38,14 @@ class QrCodePage extends StatefulWidget {
           "pdfCid": widget.cid,
           "txHash": widget.txHash,
           "certificatore": authState.ethAddress, // 🔧 prendi da AuthState
-        }
-        ,options: Options(
+        },
+        options: Options(
           headers: {"Authorization": "Bearer ${authState.token}"}, // 👈 token da AuthState
         ),
       );
       setState(() {
-        documentId = response.data["id"]; // salva _id
+        documentId = response.data["id"];
+      print("📌 Documento creato con id=$documentId");   // salva _id
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Documento creato su backend ✅")),
@@ -55,38 +57,41 @@ class QrCodePage extends StatefulWidget {
     }
   }
 Future<void> completaConQr(AuthState authState) async {
-  if (documentId == null) return;
+  print("❌ documentId nullo, devi prima fare POST");
+  if (documentId == null) throw Exception("Screenshot non valido");
+
+  
 
   try {
     final imageBytes = await screenshotController.capture();
+    print("📸 Screenshot size: ${imageBytes?.length}");
     if (imageBytes == null) return;
 
-    final dio = Dio();
-    final formData = FormData.fromMap({
-      "file": MultipartFile.fromBytes(imageBytes, filename: "qrcode.png"),
-    });
-
-    final uploadResp = await dio.post(
-      "http://10.0.2.2:8080/documents/upload",
-      data: formData,
-      options: Options(
-        headers: {"Authorization": "Bearer ${authState.token}"},
-      ),
+   // usa UploadService invece di dio.post diretto 
+  final uploadService = UploadService();
+    final uploadResp = await uploadService.uploadImageBytes(
+    imageBytes,
+    token: authState.token, // passa il token
     );
+    print("📤 Upload response: $uploadResp");
 
-    final qrCid = uploadResp.data["cid"];
-
+    final qrCid = uploadResp['cid'];
+  if (qrCid == null) throw Exception("Backend non ha restituito CID");
+  print("📌 Uso token: ${authState.token}");
+  print("📌 PATCH su /archivio-documenti/$documentId/qr con qrCid=$qrCid");
+  final dio = Dio();
     final patchResp = await dio.patch(
-      "http://10.0.2.2:8080/archivio-documenti/$documentId/qr",
+      "http://127.0.0.1:8080/archivio-documenti/$documentId/qr",
       data: {"qrCid": qrCid},
       options: Options(
         headers: {"Authorization": "Bearer ${authState.token}"},
       ),
-    );
+    ); 
+   print("✅ PATCH response: ${patchResp.data}");
 
-    // ✅ conferma dal backend
-    final message = patchResp.data["message"] ?? "Documento completato";
-
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("QR CID salvato in archivio ✅")),
+    ); 
     // Mostra un dialogo con scelte
     if (!mounted) return;
     showDialog(
@@ -94,7 +99,7 @@ Future<void> completaConQr(AuthState authState) async {
       barrierDismissible: false,
       builder: (_) => AlertDialog(
         title: const Text("Operazione completata"),
-        content: Text(message),
+        content: const Text("Operazione completata con successo."),
         actions: [
           TextButton(
             onPressed: () {
@@ -120,7 +125,8 @@ Future<void> completaConQr(AuthState authState) async {
         ],
       ),
     );
-  } catch (e) {
+  } catch (e,st) {
+     print("❌ Errore completaConQr: $e\n$st");
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text("Errore PATCH archivio: $e")),
     );

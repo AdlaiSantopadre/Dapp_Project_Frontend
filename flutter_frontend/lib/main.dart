@@ -25,16 +25,30 @@ class MyApp extends StatelessWidget {
     final startRoute = auth.isAuthenticated ? '/home' : '/login';
 
     return MaterialApp(
-      title: 'DApp Frontend',
-      initialRoute: startRoute,
-      routes: {
-        '/login': (_) => const LoginPage(),
-        '/home' : (_) => const HomePage(),
-        '/documents': (_) => const DocumentsPage(),
-        '/upload': (_) => const UploadPage(),
-        '/register': (_) => const RegisterDocumentScreen(),
-      },
-    );
+  title: 'DApp Frontend',
+  theme: ThemeData(
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ButtonStyle(
+        backgroundColor: WidgetStateProperty.resolveWith<Color>(
+          (Set<WidgetState> states) {
+            if (states.contains(WidgetState.pressed)) {
+              return Colors.green; // premuto
+            }
+            return Colors.blue; // default
+          },
+        ),
+      ),
+    ),
+  ),
+  initialRoute: startRoute,
+  routes: {
+    '/login': (_) => const LoginPage(),
+    '/home': (_) => const HomePage(),
+    '/documents': (_) => const DocumentsPage(),
+    '/upload': (_) => const UploadPage(),
+    '/register': (_) => const RegisterDocumentScreen(),
+  },
+);
   }
 }
 

@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import 'api_client.dart';
-import 'package:http_parser/http_parser.dart'; // per MediaType
+import 'package:http_parser/http_parser.dart';
+import 'dart:typed_data';
+ // per MediaType
 //Assumo che backend accetti un campo file in multipart/form-data.
 /// Invio di un PDF come multipart/form-data al backend.
 /// Richiede che ApiClient aggiunga automaticamente l'Authorization Bearer.
@@ -19,11 +21,41 @@ class UploadService {
         contentType: MediaType('application', 'pdf'),
       ),
     });
+    return _doUpload(formData);
+  }
 
+/// 🔧 Nuovo metodo per caricare immagini (es. QR code) da byte array
+  Future<Map<String, dynamic>> uploadImageBytes(
+    Uint8List bytes, {
+    String fileName = 'qrcode.png',
+    String? token, //
+  }) async {
+    print("➡️  UploadService: preparo upload immagine $fileName (${bytes.length} bytes)");
+
+    final formData = FormData.fromMap({
+      'file': MultipartFile.fromBytes(
+        bytes,
+        filename: fileName,
+        contentType: MediaType('image', 'png'),
+      ),
+    });
+  
+
+
+    return _doUpload(formData,token: token);
+  }
+
+
+
+/// funzione interna condivisa
+  Future<Map<String, dynamic>> _doUpload(FormData formData,{String? token}) async {
     try {
       final res = await _api.dio.post(
         '/documents/upload',
         data: formData,
+        options: Options(
+        headers: token != null ? {"Authorization": "Bearer $token"} : {},
+      ),
         onSendProgress: (sent, total) {
           if (total > 0) {
             final pct = (sent / total * 100).toStringAsFixed(0);

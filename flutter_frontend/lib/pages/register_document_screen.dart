@@ -180,16 +180,19 @@ class _RegisterDocumentScreenState extends State<RegisterDocumentScreen> {
         padding: const EdgeInsets.all(16),
         child: ListView(
           children: [
-            Row(
-              children: [
-                AppKitModalNetworkSelectButton(appKit: _appKitModal, context: context),
-                const SizedBox(width: 12),
-                AppKitModalConnectButton(appKit: _appKitModal, context: context),
-                const SizedBox(width: 12),
-                if (_appKitModal.isConnected)
-                  AppKitModalAccountButton(appKitModal: _appKitModal, context: context),
-              ],
-            ),
+           SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                      AppKitModalNetworkSelectButton(appKit: _appKitModal, context: context),
+                      const SizedBox(width: 12),
+                      AppKitModalConnectButton(appKit: _appKitModal, context: context),
+                      const SizedBox(width: 12),
+                      if (_appKitModal.isConnected)
+                        AppKitModalAccountButton(appKitModal: _appKitModal, context: context),
+                    ],
+                  ),
+            ), 
             const SizedBox(height: 12),
             Text('Stato: ${connected ? "Connesso" : "Disconnesso"} — Chain: ${chain ?? "-"}'),
             const Divider(height: 24),

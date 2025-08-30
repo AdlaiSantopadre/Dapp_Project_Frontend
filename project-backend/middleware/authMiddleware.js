@@ -9,6 +9,7 @@ export default async function authMiddleware(req, res, next) {
     return next();
   }
   const auth = req.headers.authorization || '';
+  console.log("🔎 Auth header ricevuto:", auth);
   if (!auth.startsWith('Bearer ')) return res.status(401).json({ error: 'Token mancante o invalido' });
 
   try {
@@ -21,7 +22,7 @@ export default async function authMiddleware(req, res, next) {
     // Mantieni compat: address ⇄ ethAddress
     req.user = { ...payload, address: payload.address || payload.ethAddress, ethAddress: payload.ethAddress || payload.address };
     next();
-  } catch {
+  } catch(err) {
      console.error('[authMiddleware] JWT verify error:', err);
     res.status(401).json({ error: 'Token non valido o scaduto' });
   }

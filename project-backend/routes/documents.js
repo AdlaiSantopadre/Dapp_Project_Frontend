@@ -2,7 +2,6 @@ import express from 'express';
 import multer from 'multer';
 import authMiddleware from '../middleware/authMiddleware.js';
 import roleMiddleware from '../middleware/roleMiddleware.js';
-import { registerDocumentOnChain } from '../services/documentRegistry.js';
 import { sha256Hex } from '../utils/hash.js';
 
 export default function documentsRouter({ storage }) {
@@ -12,13 +11,17 @@ export default function documentsRouter({ storage }) {
 
   const router = express.Router();
 
-  // Limiti e filtro: solo PDF, max 20MB (regola tu)
-  const upload = multer({
+  // Limiti e filtro: solo PDF o PNG , max 20MB (configurabile)
+   const upload = multer({
     storage: multer.memoryStorage(),
     limits: { fileSize: 20 * 1024 * 1024 },
     fileFilter: (_req, file, cb) => {
-      const ok = (file.mimetype || '').toLowerCase() === 'application/pdf' || /\.pdf$/i.test(file.originalname || '');
-      cb(ok ? null : new Error('Solo PDF ammessi'), ok);
+      const mime = (file.mimetype || '').toLowerCase();
+      if (mime === 'application/pdf' || mime === 'image/png') {
+        cb(null, true);
+      } else {
+        cb(new Error('Formato non supportato: solo PDF o PNG ammessi'), false);
+      }
     },
   });
 
@@ -76,11 +79,10 @@ export default function documentsRouter({ storage }) {
            return res.status(502).json({ error: 'Registrazione on-chain fallita (txHash assente)' });
          }*/
 
-        return res.status(201).json({ cid, hash,metadata, /*txHash*/  });
+        return res.status(201).json({ cid, hash, metadata });
       } catch (err) {
-        // errori da multer (limiti/filtro)
-        if (err?.message === 'Solo PDF ammessi') {
-          return res.status(415).json({ error: 'Formato non supportato: è richiesto un PDF' });
+        if (err?.message?.includes('Formato non supportato')) {
+          return res.status(415).json({ error: err.message });
         }
         if (err?.code === 'LIMIT_FILE_SIZE') {
           return res.status(413).json({ error: 'File troppo grande' });
@@ -107,7 +109,7 @@ export default function documentsRouter({ storage }) {
       // Imposta gli header per il download
       // Imposta intestazioni corrette
         res.setHeader('Content-Type', file.mimetype || 'application/pdf');
-        res.setHeader('Content-Disposition', `inline; filename="${file.name || 'documento.pdf'}"`);
+        res.setHeader('Content-Disposition', `inline; filename="${file.name || 'documento'}"`);
 
       return res.send(file.data);
     } catch (err) {

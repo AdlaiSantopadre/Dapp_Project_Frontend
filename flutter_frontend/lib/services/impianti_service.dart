@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import 'api_client.dart';
-
+//serve per la parte in cui il certificatore (o altro utente) 
+//deve vedere la lista degli impianti configurati e scegliere 
+//su quale impianto registrare il documento.
 
 
 class ImpiantiService {
