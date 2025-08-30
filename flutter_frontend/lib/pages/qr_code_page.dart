@@ -172,11 +172,11 @@ Future<void> completaConQr(AuthState authState) async {
               icon: const Icon(Icons.qr_code),
               label: const Text("2. Completa con QR"),
             ),  
-            ElevatedButton.icon(
+            /*ElevatedButton.icon(
               onPressed: () => registraDocumento(authState),
               icon: const Icon(Icons.cloud_upload),
               label: const Text("Registra su backend"),
-            )
+            )*/
           ],
         ),
       ),
