@@ -25,6 +25,7 @@ class QrCodePage extends StatefulWidget {
 }
   class _QrCodePageState extends State<QrCodePage> {
   final ScreenshotController screenshotController = ScreenshotController();
+  bool _loadingQr = false;
   String? documentId; // id Mongo restituito dal POST
       
 
@@ -61,7 +62,7 @@ Future<void> completaConQr(AuthState authState) async {
   if (documentId == null) throw Exception("Screenshot non valido");
 
   
-
+  setState(() => _loadingQr = true);
   try {
     final imageBytes = await screenshotController.capture();
     print("📸 Screenshot size: ${imageBytes?.length}");
@@ -71,7 +72,7 @@ Future<void> completaConQr(AuthState authState) async {
   final uploadService = UploadService();
     final uploadResp = await uploadService.uploadImageBytes(
     imageBytes,
-    token: authState.token, // passa il token
+    token: authState.token! // passa il token
     );
     print("📤 Upload response: $uploadResp");
 
@@ -97,7 +98,9 @@ Future<void> completaConQr(AuthState authState) async {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => AlertDialog(
+      builder: (context) {
+    final authState = Provider.of<AuthState>(context, listen: false);
+    return AlertDialog(
         title: const Text("Operazione completata"),
         content: const Text("Operazione completata con successo."),
         actions: [
@@ -123,14 +126,17 @@ Future<void> completaConQr(AuthState authState) async {
             child: const Text("Esci"),
           ),
         ],
-      ),
+      );
+      },
     );
   } catch (e,st) {
      print("❌ Errore completaConQr: $e\n$st");
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text("Errore PATCH archivio: $e")),
     );
-  }
+  }finally {
+      setState(() => _loadingQr = false);
+    }
 }
 
 
@@ -166,13 +172,30 @@ Future<void> completaConQr(AuthState authState) async {
               icon: const Icon(Icons.cloud_upload),
               label: const Text("1. Registra documento"),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(
+              height: 20),
             ElevatedButton.icon(
-              onPressed: () => completaConQr(authState),
-              icon: const Icon(Icons.qr_code),
-              label: const Text("2. Completa con QR"),
+              onPressed: _loadingQr ? null : () => completaConQr(authState),
+              icon: _loadingQr
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Icon(Icons.qr_code),
+              label: Text(_loadingQr ? "Attendere..." : "2. Completa con QR"),
             ),  
-            /*ElevatedButton.icon(
+            /*
+            ElevatedButton(
+              onPressed: _loading ? null : _uploadFile,
+              child: _loading
+                  ? const CircularProgressIndicator()
+                  : const Text('Carica su IPFS'),
+            ),
+            ElevatedButton.icon(
               onPressed: () => registraDocumento(authState),
               icon: const Icon(Icons.cloud_upload),
               label: const Text("Registra su backend"),

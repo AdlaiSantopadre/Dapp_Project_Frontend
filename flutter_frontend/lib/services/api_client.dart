@@ -19,6 +19,7 @@ class ApiClient {
       InterceptorsWrapper(
         onRequest: (options, handler) async {
           final token = await SecureStore.token;
+          print("🔑 Token letto da SecureStore: $token");
           if (token != null && token.isNotEmpty) {
             options.headers['Authorization'] = 'Bearer $token';
         }

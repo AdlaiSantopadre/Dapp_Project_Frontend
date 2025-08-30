@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'api_client.dart';
 import 'package:http_parser/http_parser.dart';
 import 'dart:typed_data';
+
  // per MediaType
 //Assumo che backend accetti un campo file in multipart/form-data.
 /// Invio di un PDF come multipart/form-data al backend.
@@ -9,7 +10,10 @@ import 'dart:typed_data';
 class UploadService {
   final _api = ApiClient();
 
-  Future<Map<String, dynamic>> uploadPdf(String filePath) async {
+  Future<Map<String, dynamic>> uploadPdf(
+  String filePath, {
+  required String? token,
+}) async {
     final fileName = filePath.split('/').last;
     print("➡️  UploadService: preparo upload di $fileName ($filePath)");
 
@@ -21,14 +25,14 @@ class UploadService {
         contentType: MediaType('application', 'pdf'),
       ),
     });
-    return _doUpload(formData);
+    return _doUpload(formData, token: token);
   }
 
 /// 🔧 Nuovo metodo per caricare immagini (es. QR code) da byte array
   Future<Map<String, dynamic>> uploadImageBytes(
     Uint8List bytes, {
     String fileName = 'qrcode.png',
-    String? token, //
+    required String? token//
   }) async {
     print("➡️  UploadService: preparo upload immagine $fileName (${bytes.length} bytes)");
 
@@ -54,7 +58,11 @@ class UploadService {
         '/documents/upload',
         data: formData,
         options: Options(
-        headers: token != null ? {"Authorization": "Bearer $token"} : {},
+        headers: {
+      ..._api.dio.options.headers,    // mantieni quelli dell’interceptor
+      if (token != null && token.isNotEmpty)
+        "Authorization": "Bearer $token", // eventualmente sovrascrivi
+    },
       ),
         onSendProgress: (sent, total) {
           if (total > 0) {

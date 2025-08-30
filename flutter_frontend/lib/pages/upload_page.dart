@@ -47,7 +47,7 @@ class _UploadPageState extends State<UploadPage> {
       _result = null;
     });
     try {
-      final res = await _service.uploadPdf(_selectedFile!.path);
+      final res = await _service.uploadPdf(_selectedFile!.path, token: auth.token !);
       // ✅ salva i dati nel provider AuthState
       
       auth.setLastDocument(
