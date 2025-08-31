@@ -22,6 +22,16 @@ class ArchivioDocumentiService {
     }
   }
 
+  /// 📑 Lista completa di tutti i documenti
+  Future<List<Map<String, dynamic>>> listAll() async {
+    final response = await _api.dio.get('/archivio-documenti');
+    if (response.statusCode == 200) {
+      final List data = response.data;
+      return List<Map<String, dynamic>>.from(data);
+    } else {
+      throw Exception('Errore caricamento documenti');
+    }
+  }
   /// 📌 Recupera un documento specifico per ID
   Future<Map<String, dynamic>> getById(String id) async {
     try {
@@ -41,4 +51,3 @@ class ArchivioDocumentiService {
     }
   }
 }
-

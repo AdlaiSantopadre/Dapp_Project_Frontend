@@ -48,7 +48,7 @@ class _UploadPageState extends State<UploadPage> {
     });
     try {
       final res = await _service.uploadPdf(_selectedFile!.path, token: auth.token !);
-      // ✅ salva i dati nel provider AuthState
+      // salva i dati nel provider AuthState
       
       auth.setLastDocument(
         hash: res['hash'],
@@ -57,9 +57,9 @@ class _UploadPageState extends State<UploadPage> {
       );
 
       setState(() {
-        _result = "✅ Upload riuscito!\nCID: ${res['cid']}\nTx: ${res['txHash']}";
+        _result = " Upload riuscito!\nCID: ${res['cid']}\nTx: ${res['txHash']}";
       });
-      // ✅ dopo upload vai direttamente a RegisterDocumentScreen
+      // dopo upload vai direttamente a RegisterDocumentScreen
       if (mounted) {
         Navigator.of(context).pushNamed('/register');
       }
@@ -84,7 +84,7 @@ class _UploadPageState extends State<UploadPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ✅ Mostra impianto selezionato
+            // Mostra impianto selezionato
           Card(
             color: Colors.grey[100],
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -98,7 +98,7 @@ class _UploadPageState extends State<UploadPage> {
                     child: Text(
                       auth.selectedImpiantoId != null
                           ? "Impianto selezionato: ${auth.selectedImpiantoId}"
-                          : "⚠️ Nessun impianto selezionato (sceglilo in Home)",
+                          : "Nessun impianto selezionato (sceglilo in Home)",
                       style: const TextStyle(fontSize: 16),
                     ),
                   ),

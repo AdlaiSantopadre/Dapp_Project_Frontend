@@ -50,6 +50,7 @@ dependencies:
   reown_appkit: ^1.0.0     # SDK per dApp (modal/connect/network)
            
   url_launcher: ^6.3.0         
+  syncfusion_flutter_pdfviewer: ^30.2.7
 
 
 dev_dependencies:

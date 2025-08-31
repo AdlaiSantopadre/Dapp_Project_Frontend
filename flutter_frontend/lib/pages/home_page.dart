@@ -15,9 +15,10 @@ class HomePage extends StatefulWidget {
 
   @override
   void initState() {
-    super.initState();
-    _loadImpianti();
+  super.initState();
+  _loadImpianti();
   }
+  /*funzione per caricare gli impianti dal backend e popolare il dropdown*/
   Future<void> _loadImpianti() async {
     try {
       final impianti = await ImpiantiService().listImpianti();
@@ -31,14 +32,16 @@ class HomePage extends StatefulWidget {
       }
     }
   }
+
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthState>();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home'),
-        actions: [
+        title: const Text("Home Page"
+        ),
+           actions: [
           IconButton(
             onPressed: () async {
               await context.read<AuthState>().logout();
@@ -50,16 +53,20 @@ class HomePage extends StatefulWidget {
           )
         ],
       ),
+     
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
+        child: SingleChildScrollView(
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Utente: ${auth.username ?? '-'}'),
             Text('Ruolo: ${auth.role ?? '-'}'),
             Text('ETH: ${auth.ethAddress ?? '-'}'),
             const SizedBox(height: 24),
-             // 👇 Dropdown per scegliere impianto
+            // Caso CERTIFICATORE
+            if (auth.hasRole('CERTIFICATORE_ROLE')) ...[
+             //Dropdown per scegliere impianto
             DropdownButton<String>(
               value: _selectedImpianto,
               hint: const Text("Seleziona impianto"),
@@ -94,8 +101,16 @@ class HomePage extends StatefulWidget {
               ),
           ],
           ],
+        // Caso MANUTENTORE o ISPETTORE → solo consultazione
+            if (auth.role == 'MANUTENTORE_ROLE' || auth.role == 'ISPETTORE_ROLE')
+              ElevatedButton(
+                onPressed: () => Navigator.pushNamed(context, '/documents'),
+                child: const Text("Consulta documenti"),
+              ),
+        ]  
         ),
       ),
+      )
     );
   }
 }

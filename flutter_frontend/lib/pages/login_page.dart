@@ -1,3 +1,9 @@
+/*costruisce il form di login (username e password),
+chiama AuthService.login(username, password) → che invia la richiesta al backend,
+riceve la risposta (token, role, username),
+popola l’AuthState (quindi ruolo e token diventano disponibili in tutta l’app),
+
+fa il redirect alla HomePage*/
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../state/auth_state.dart';
