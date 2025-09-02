@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_frontend/config.dart';
 import 'package:flutter_frontend/services/upload_service.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -32,8 +33,9 @@ class QrCodePage extends StatefulWidget {
   Future<void> registraDocumento(AuthState authState) async {
       try {
         final dio = Dio();
+        try{
         final response = await dio.post(
-          "http://localhost:8080/archivio-documenti", //  backend URL
+          "${AppConfig.apiBaseUrl}/archivio-documenti", //  backend URL
           data: {
           "impiantoId": widget.impiantoId,
           "pdfCid": widget.cid,
@@ -44,16 +46,30 @@ class QrCodePage extends StatefulWidget {
           headers: {"Authorization": "Bearer ${authState.token}"}, // 👈 token da AuthState
         ),
       );
+      // ✅ Estrai l'ID dal payload corretto
+      final data = response.data;
+      final newId = data["documento"]?["id"];
       setState(() {
-        documentId = response.data["id"];
-      print("📌 Documento creato con id=$documentId");   // salva _id
-      });
+        documentId = newId;
+      print(" Documento creato con id=$documentId");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Documento creato su backend ✅")),
       );
+      });
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 409) {
+      print(" Documento già esistente: ${e.response?.data}");
+        } else {
+      print(" Errore backend: ${e.response?.statusCode} ${e.response?.data}");
+     ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Errore backend: ${e.response?.statusCode}")),
+        );
+    }
+  }
+      
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Errore POST archivio: $e")),
+        SnackBar(content: Text("Errore POST : $e")),
       );
     }
   }
@@ -82,7 +98,7 @@ Future<void> completaConQr(AuthState authState) async {
   print("📌 PATCH su /archivio-documenti/$documentId/qr con qrCid=$qrCid");
   final dio = Dio();
     final patchResp = await dio.patch(
-      "http://127.0.0.1:8080/archivio-documenti/$documentId/qr",
+      "${AppConfig.apiBaseUrl}/archivio-documenti/$documentId/qr",
       data: {"qrCid": qrCid},
       options: Options(
         headers: {"Authorization": "Bearer ${authState.token}"},
@@ -104,7 +120,7 @@ Future<void> completaConQr(AuthState authState) async {
         title: const Text("Operazione completata"),
         content: const Text("Operazione completata con successo."),
         actions: [
-          TextButton(
+          ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop(); // chiudi dialog
               Navigator.of(context).pushNamedAndRemoveUntil(
@@ -114,7 +130,7 @@ Future<void> completaConQr(AuthState authState) async {
             },
             child: const Text("Nuovo documento"),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop(); // chiudi dialog
               authState.logout();

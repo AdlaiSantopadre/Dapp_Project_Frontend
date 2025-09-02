@@ -13,6 +13,7 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
+app.get('/healthz', (_req, res) => res.json({ ok: true }));
 
 app.get('/.well-known/jwks.json', async (req, res) => {
   res.set('Cache-Control', 'public, max-age=300, immutable');

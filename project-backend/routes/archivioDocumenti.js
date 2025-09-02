@@ -12,20 +12,30 @@ router.post(
   async (req, res) => {
     try {
     const doc = await createDocumento(req.body);
-    res.status(201).json(doc);
+
+    //risposta
+    return res.status(201).json({
+      ok : true,
+      documento : doc
+      });
 
     } catch (err) {
-      if (err.message.includes('E11000')) {
-        return res.status(400).json({ error: 'Documento già esistente' });
-      }     
       console.error("❌ Errore creazione documento:", err);
-      res.status(500).json({ error: 'Errore creazione documento' });
+      
+      if (err.code === 11000) {
+        return res.status(409).json({ 
+          ok: false,
+           error: 'Documento già esistente' });
+      }     
+      
+      res.status(500).json({
+        ok: false,
+        error: 'Errore creazione documento' });
     }
   }
 );
 
-router.patch(
-  '/:id/qr',
+router.patch('/:id/qr',
   authMiddleware,
   roleMiddleware(['CERTIFICATORE_ROLE']),
   async (req, res) => {

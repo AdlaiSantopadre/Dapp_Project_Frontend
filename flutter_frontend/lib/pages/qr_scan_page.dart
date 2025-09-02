@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_frontend/state/auth_state.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:provider/provider.dart' show Provider;
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 class QrScanPage extends StatefulWidget {
@@ -87,33 +89,51 @@ class _QrScanPageState extends State<QrScanPage> {
             Expanded(child: SfPdfViewer.network(_pdfUrl!)),
           if (_status != null)
             Padding(
-              padding: const EdgeInsets.all(12),
-              child: Text(_status!, style: const TextStyle(fontSize: 14)),
-            ),
-          if (_pdfUrl != null)
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.qr_code_scanner),
-                    label: const Text("Nuovo QR"),
-                    onPressed: () {
-                      setState(() {
-                        _pdfUrl = null;
-                        _status = "Scanner riavviato";
-                      });
+              padding: const EdgeInsets.all(40.0),
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.done),
+                label: Text(_status!),
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) {
+                      Provider.of<AuthState>(
+                        context,
+                        listen: false,
+                      );
+                      return AlertDialog(
+                        title: const Text("Operazione completata"),
+                        content: const Text(
+                          "Operazione completata con successo.",
+                        ),
+                        actions: [
+                          ElevatedButton.icon(
+                            icon: const Icon(Icons.qr_code_scanner),
+                            label: const Text("Nuovo QR"),
+                            onPressed: () {
+                              setState(() {
+                                _pdfUrl = null;
+                                _status = "Scanner riavviato";
+                              });
+                            },
+                          ),
+                          ElevatedButton.icon(
+                            icon: const Icon(Icons.exit_to_app),
+                            label: const Text("Chiudi"),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              Navigator.of(context).pushNamedAndRemoveUntil(
+                                '/login',
+                                (route) => false,
+                              );
+                            },
+                          ),
+                        ],
+                      );
                     },
-                  ),
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.exit_to_app),
-                    label: const Text("Chiudi"),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
-                  }),
-                ],
+                  );
+                },
               ),
             ),
         ],
